@@ -1,9 +1,9 @@
-# Coolify deployment. In Coolify: New Resource -> Docker Compose (from this
-# Git repo), set "Docker Compose Location" to /docker-compose.coolify.yml,
-# then assign your domain to the `web` service with port 8000
-# (e.g. https://spool.example.com:8000 - Coolify strips the port from the
-# public URL). Set the variables below in Coolify's Environment Variables
-# tab. See docs/COOLIFY.md.
+# Coolify deployment behind your own Nginx Proxy Manager (NOT Coolify's
+# Traefik). In Coolify: New Resource -> Docker Compose (from this Git repo),
+# set "Docker Compose Location" to /docker-compose.coolify.yml and leave the
+# web service's Domain EMPTY. `web` joins the external `coolify` network so
+# NPM can proxy to http://spool-web:8000. Set the variables below in
+# Coolify's Environment Variables tab. See docs/COOLIFY.md.
 #
 # Variables marked `:?` are required - Coolify refuses to deploy without them.
 x-app-env: &app-env
@@ -56,6 +56,8 @@ services:
 
   web:
     build: .
+    # Fixed name = stable hostname for NPM's "Forward Hostname".
+    container_name: spool-web
     restart: unless-stopped
     depends_on:
       db:
@@ -69,10 +71,12 @@ services:
       ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-Admin}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
       GUNICORN_THREADS: ${GUNICORN_THREADS:-2}
-    # No host port: Coolify's proxy (Traefik) reaches the container over
-    # its own network.
+    # No host port: NPM reaches the container over the shared coolify network.
     expose:
       - "8000"
+    networks:
+      - default
+      - coolify
     volumes:
       - media_data:/app/media
     command: >
@@ -118,3 +122,10 @@ volumes:
   db_data:
   redis_data:
   media_data:
+
+networks:
+  # Pre-existing network NPM can also see. Change `name` if your Coolify
+  # destination network isn't called "coolify".
+  coolify:
+    external: true
+    name: coolify
