@@ -124,7 +124,7 @@
   /* Page shell */
   .page {
     width: 100%;
-    max-width: 1560px;
+    max-width: 2040px;
     margin-inline: auto;
   }
   .page-narrow {
@@ -351,13 +351,19 @@
   }
   @media (min-width: 640px) {
     .media-grid {
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 1.75rem 1.125rem;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 2rem 1.25rem;
     }
   }
-  @media (min-width: 1536px) {
+  @media (min-width: 1280px) {
     .media-grid {
-      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    }
+  }
+  @media (min-width: 1700px) {
+    .media-grid {
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 2.25rem 1.5rem;
     }
   }
   .media-grid-sm {
@@ -373,7 +379,7 @@
 
   /* Media card text under a poster */
   .media-title {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     line-height: 1.3;
     color: var(--color-base-content);
@@ -665,8 +671,8 @@ html[data-nav="collapsed"] .nav-collapse-btn {
     color: #fff;
   }
   .media-card .meta {
-    margin-top: 0.125rem;
-    font-size: 0.75rem;
+    margin-top: 0.1875rem;
+    font-size: 0.78125rem;
     flex-wrap: nowrap;
     overflow: hidden;
     white-space: nowrap;
@@ -745,7 +751,7 @@ html[data-nav="collapsed"] .nav-collapse-btn {
   @media (min-width: 640px) {
     .media-row {
       grid-auto-flow: row;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
       grid-template-rows: auto;
       grid-auto-rows: 0;
       column-gap: 1.125rem;
@@ -755,9 +761,15 @@ html[data-nav="collapsed"] .nav-collapse-btn {
       padding-inline: 0;
     }
   }
-  @media (min-width: 1536px) {
+  @media (min-width: 1280px) {
     .media-row {
-      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    }
+  }
+  @media (min-width: 1700px) {
+    .media-row {
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      column-gap: 1.5rem;
     }
   }
   .landscape-row {
