@@ -233,26 +233,39 @@
     {% endcomment %}
     {% comment %}
       Long seasons show their first 12 rows plus a "Show all" control, so
-      a 24-episode season doesn't turn the page into a wall. Expanded on
-      load when "up next" (or an #episode-S-E deep link) is further down
-      than that, so the episode you came for is never the hidden one.
+      a 24-episode season doesn't turn the page into a wall. When "up
+      next" (or an #episode-S-E deep link) is further down than that,
+      only a window around it (3 before, 8 after) is shown, with "Show
+      earlier episodes" above it, rather than expanding the whole season -
+      a 366-episode anime season would otherwise render every row.
     {% endcomment %}
     <div
       class="ep-list flex flex-col gap-1"
       x-data="{
         all: {% if episodes|length > 12 %}false{% else %}true{% endif %},
+        from: -1,
+        to: -1,
         init() {
           if (this.all) return;
           const rows = [...this.$el.querySelectorAll('.ep-row')];
           const upNext = this.$el.querySelector('.ep-row[data-state=watched] + .ep-row[data-state=unwatched]');
           const m = location.hash.match(/^#episode-(\d+)-(\d+)$/);
-          if ((upNext && rows.indexOf(upNext) >= 12) || (m && +m[1] === {{ season }} && +m[2] > 12)) this.all = true;
+          let focus = upNext ? rows.indexOf(upNext) : -1;
+          if (m && +m[1] === {{ season }}) {
+            const linked = rows.findIndex((r) => r.dataset.episode === m[1] + '-' + m[2]);
+            if (linked >= 0) focus = linked;
+          }
+          if (focus >= 12) { this.from = focus - 3; this.to = focus + 8; }
         },
+        shown(i) { return this.all || (this.from < 0 ? i < 12 : i >= this.from && i <= this.to); },
       }"
     >
+      {% if episodes|length > 12 %}
+        <button type="button" x-show="!all && from > 0" x-cloak @click="all = true" class="mb-2 self-start btn btn-sm btn-ghost text-ink-dim">Show earlier episodes</button>
+      {% endif %}
       {% for ep in episodes %}
-        <div data-episode="{{ season }}-{{ ep.episode_number }}" data-state="{% if ep.watched %}watched{% elif ep.release_in %}upcoming{% else %}unwatched{% endif %}" {% if forloop.counter > 12 %}x-show="all"{% endif %} class="episode-card ep-row flex items-center gap-3.5 sm:gap-5 py-2 px-2 -mx-2 rounded-lg hover:bg-white/[0.025]">
-          <div class="w-[104px] sm:w-36 aspect-video flex-none rounded-md relative overflow-hidden bg-base-300 {% if not ep.still_url %}{{ title.pk|default:preview_tmdb_id|add:ep.episode_number|gradient_class }}{% endif %}">
+        <div data-episode="{{ season }}-{{ ep.episode_number }}" data-state="{% if ep.watched %}watched{% elif ep.release_in %}upcoming{% else %}unwatched{% endif %}" {% if episodes|length > 12 %}x-show="shown({{ forloop.counter0 }})"{% endif %} class="episode-card ep-row flex items-center gap-3.5 sm:gap-5 py-1.5 px-2 -mx-2 rounded-lg hover:bg-white/[0.03]">
+          <div class="w-[104px] sm:w-32 aspect-video flex-none rounded-md relative overflow-hidden bg-base-300 {% if not ep.still_url %}{{ title.pk|default:preview_tmdb_id|add:ep.episode_number|gradient_class }}{% endif %}">
             {% if ep.still_url %}
               <img src="{{ ep.still_url|poster_size:"w342" }}" alt="" loading="lazy" class="ep-thumb absolute inset-0 w-full h-full object-cover">
             {% endif %}

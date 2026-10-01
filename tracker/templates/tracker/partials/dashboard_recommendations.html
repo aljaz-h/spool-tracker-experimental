@@ -44,7 +44,7 @@ once the list has shrunk.
           <div class="flex items-center gap-1.5 mt-3">
             <form class="flex-1" hx-post="{% url 'reveal_recommendation' rec.pk %}" hx-target="#recommendations-block" hx-swap="{{ "outerHTML"|animated_swap:active_profile.animations_enabled }}">
               {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-primary btn-block">Open it</button>
+              <button type="submit" class="btn btn-sm btn-soft btn-block">Open it</button>
             </form>
             <form hx-post="{% url 'dismiss_recommendation' rec.pk %}" hx-target="#recommendations-block" hx-swap="{{ "outerHTML"|animated_swap:active_profile.animations_enabled }}">
               {% csrf_token %}

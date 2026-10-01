@@ -214,6 +214,11 @@
       font-size: 1.3125rem;
     }
   }
+  /* Secondary rails (Home's household column): same weight, one step
+     smaller, so the main column's sections lead. */
+  .section-title.section-title-sm {
+    font-size: 1.0625rem;
+  }
   .section-count {
     margin-left: 0.375rem;
     font-weight: 500;
@@ -293,10 +298,10 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    height: 1.25rem;
-    padding: 0 0.4rem;
+    height: 1.375rem;
+    padding: 0 0.45rem;
     border-radius: 5px;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
@@ -389,21 +394,23 @@
   }
 
   /* Responsive poster grid - posters dominate, cards stay light. */
+  /* Tracker density, not a streaming homepage: 3 columns on phones, then
+     ~170px posters - 5 across at 1366px, 6 at 1440px. */
   .media-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-    gap: 1.25rem 0.875rem;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1.25rem 0.75rem;
   }
   @media (min-width: 640px) {
     .media-grid {
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 2rem 1.25rem;
     }
   }
   @media (min-width: 1280px) {
     .media-grid {
-      grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
-      gap: 2.5rem 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 2.25rem 1.25rem;
     }
   }
   .media-grid-sm {
@@ -794,7 +801,7 @@ html[data-nav="collapsed"] .nav-collapse-btn {
   @media (min-width: 640px) {
     .media-row {
       grid-auto-flow: row;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       grid-template-rows: auto;
       grid-auto-rows: 0;
       column-gap: 1.125rem;
@@ -806,7 +813,7 @@ html[data-nav="collapsed"] .nav-collapse-btn {
   }
   @media (min-width: 1280px) {
     .media-row {
-      grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
       column-gap: 1.25rem;
     }
   }
@@ -820,7 +827,7 @@ html[data-nav="collapsed"] .nav-collapse-btn {
   }
   @media (min-width: 1280px) {
     .media-row.media-row-sm {
-      grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     }
   }
   .landscape-row {
@@ -1411,4 +1418,29 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 .discover-tile.discover-tile-dim:is(.tile-hover, .tile-focus) {
   opacity: 1;
+}
+
+/* Short viewports (phones in landscape, ~390px tall): the top bar, title
+   tabs and day headings stop pinning - with the bottom nav they would
+   otherwise cover a third of the screen. They scroll away like content;
+   the bottom nav stays as the one fixed control. */
+@media (max-height: 520px) {
+  .app-topbar,
+  .title-tabs,
+  .day-head {
+    position: static;
+  }
+}
+
+/* Focus rings inside clipping containers (tab strips, sideways rows, the
+   one-row media strips) would be cut off at the edges with the global
+   2px outside offset - draw them inside the element instead so keyboard
+   focus stays fully visible. */
+.tabs-line :focus-visible,
+.media-row :focus-visible,
+.landscape-row :focus-visible,
+.scroll-row :focus-visible,
+.ep-list :focus-visible {
+  outline-offset: -2px;
+  border-radius: 6px;
 }

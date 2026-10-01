@@ -29,7 +29,7 @@ yet enabled (QR + manual-entry secret + a code field to confirm setup).
     <div class="grid grid-cols-2 gap-1.5 font-mono text-xs bg-base-300 rounded-lg p-3 mb-3">
       {% for code in backup_codes_to_show %}<div>{{ code }}</div>{% endfor %}
     </div>
-    <div class="text-[11.5px] text-ink-faint">Once you've saved these, reload this page - they won't be shown again after that.</div>
+    <div class="text-[12px] text-ink-faint">Once you've saved these, reload this page - they won't be shown again after that.</div>
 
   {% elif profile.totp_enabled %}
     <div class="flex items-center gap-2 text-sm text-success font-semibold mb-4">{% icon "shield" "w-4 h-4" %} On</div>

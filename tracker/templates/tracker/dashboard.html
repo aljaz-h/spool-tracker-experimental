@@ -149,7 +149,7 @@
       {% if on_this_day %}
         <section>
           <div class="section-head">
-            <h2 class="section-title">On This Day</h2>
+            <h2 class="section-title section-title-sm">On This Day</h2>
           </div>
           <div class="rows">
             {% for entry in on_this_day|slice:":5" %}
@@ -163,7 +163,7 @@
       {% if social_activity %}
         <section>
           <div class="section-head">
-            <h2 class="section-title">Social Activity</h2>
+            <h2 class="section-title section-title-sm">Social Activity</h2>
             {% if show_activity_nav %}<a href="{% url 'activity' %}" class="section-link">All activity &rarr;</a>{% endif %}
           </div>
           <div class="rows">

@@ -70,7 +70,7 @@
             <span class="type-dot {{ page_media_type|media_dot_class }}"></span>
             {% if page_media_type == "movie" %}Movie{% elif page_media_type == "anime" %}Anime{% else %}TV Series{% endif %}
           </div>
-          <h1 class="mt-1.5 text-[1.5rem] sm:text-[2.25rem] lg:text-[2.75rem] font-bold leading-[1.06] tracking-[-0.025em] text-white text-balance">
+          <h1 class="mt-1.5 {% if display_name|length > 40 %}text-[1.25rem] sm:text-[1.75rem] lg:text-[2.125rem]{% else %}text-[1.5rem] sm:text-[2.25rem] lg:text-[2.75rem]{% endif %} font-bold leading-[1.08] tracking-[-0.025em] text-white text-balance">
             {{ display_name }}
           </h1>
           {% if mal_title_japanese %}
@@ -261,7 +261,7 @@
                       </button>
                       {% if season_cards|length > 1 %}
                         <div class="border-t border-line mt-1 pt-1.5">
-                          <div class="px-2 pb-1 text-[11.5px] font-semibold text-ink-faint uppercase tracking-wide">By season</div>
+                          <div class="px-2 pb-1 text-[12px] font-semibold text-ink-faint uppercase tracking-wide">By season</div>
                           <div class="max-h-52 overflow-y-auto flex flex-col gap-0.5 pr-0.5">
                             {% for card in season_cards %}
                               <button type="button"
@@ -367,6 +367,9 @@
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_288px] xl:grid-cols-[minmax(0,1fr)_320px] gap-x-12 xl:gap-x-16 gap-y-12 mb-8">
     <div class="min-w-0">
       <div x-show="tab === 'overview'" {% if seasons %}x-cloak{% endif %} role="tabpanel">
+        {% if not gallery_items and not director and not cast and not collection_parts and not similar %}
+          <p class="text-sm text-ink-dim py-2">TMDB doesn't have media, cast or related titles for this one yet.</p>
+        {% endif %}
         {% if gallery_items %}
           {% comment %}
             json_script (not a template-side |escapejs chain) for the

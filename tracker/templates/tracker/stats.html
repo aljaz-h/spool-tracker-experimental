@@ -133,14 +133,14 @@
         <div class="flex items-end justify-between gap-2 h-[140px]">
           {% for d in release_years.decades %}
             <div class="flex flex-col items-center justify-end flex-1 h-full">
-              <div class="text-[11.5px] font-semibold text-ink-dim mb-1 tabular-nums">{{ d.count }}</div>
+              <div class="text-[12px] font-semibold text-ink-dim mb-1 tabular-nums">{{ d.count }}</div>
               <div
                 tabindex="0" aria-label="{{ d.label }} · {{ d.count }} title{{ d.count|pluralize }}"
                 class="w-full max-w-[28px] rounded-t spool-tooltip {% if d.pct == 100 %}bg-primary{% else %}bg-primary/35{% endif %}"
                 style="height:{{ d.pct }}%"
                 data-tooltip="{{ d.label }} · {{ d.count }} title{{ d.count|pluralize }}"
               ></div>
-              <div class="text-[11.5px] text-ink-faint mt-1.5">{{ d.label }}</div>
+              <div class="text-[12px] text-ink-faint mt-1.5">{{ d.label }}</div>
             </div>
           {% endfor %}
         </div>
@@ -235,7 +235,7 @@
       <div class="flex items-end justify-between gap-2 h-[140px]">
         {% for d in daily_breakdown.days %}
           <div class="flex flex-col items-center justify-end flex-1 h-full">
-            <div class="text-[11.5px] font-semibold text-ink-dim mb-1 h-3.5 whitespace-nowrap tabular-nums">
+            <div class="text-[12px] font-semibold text-ink-dim mb-1 h-3.5 whitespace-nowrap tabular-nums">
               {% if daily_breakdown.peak_minutes and d.minutes == daily_breakdown.peak_minutes %}{{ d.duration }}{% endif %}
             </div>
             <div
@@ -244,7 +244,7 @@
               style="height:{{ d.height_pct }}%"
               data-tooltip="{{ d.label }} · {{ d.duration }}"
             ></div>
-            <div class="text-[11.5px] text-ink-faint mt-1.5">{{ d.label }}</div>
+            <div class="text-[12px] text-ink-faint mt-1.5">{{ d.label }}</div>
           </div>
         {% endfor %}
       </div>

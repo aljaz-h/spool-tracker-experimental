@@ -85,7 +85,13 @@ controls and avatars. Shadows only on floating things — menus/popovers
   40px (phone / tablet / desktop, set once on `.page`), content capped at
   1480px. Main + rail layouts use one shape everywhere: `minmax(0,1fr)`
   plus a 288–340px rail with a 48–64px gap (Home, title pages, Activity).
-  Sections are 44px apart on phones, 56px on desktop.
+  Sections are 44px apart on phones, 56px on desktop. A page header sits
+  32px above its first section, 24px when a tab/filter row follows it;
+  a section heading sits 16px above its content.
+- **Pinned UI** is at most: top bar + one sticky strip (title tabs or a
+  day heading) + the phone bottom nav — under 20% of the viewport. On
+  short viewports (landscape phones, under 520px tall) only the bottom
+  nav stays fixed.
 - **Desktop (lg+):** slim left sidebar (`sidebar.html`) — wordmark, Home,
   Browse (Movies/TV/Anime), Library (Calendar/History/Lists/Stats/
   Activity), Settings at the bottom. Muted by default; active item gets a
@@ -122,21 +128,29 @@ controls and avatars. Shadows only on floating things — menus/popovers
   sticky rail (rating, where to watch, recommend). Tabs are Alpine state
   mirrored to the URL hash; every panel stays in the DOM so HTMX targets
   keep working. Shows open on Episodes, movies on Overview. Long seasons
-  show 12 episodes plus "Show all".
+  show 12 episodes plus "Show all"; when "up next" (or a linked episode)
+  is further in, only a window around it is shown, with "Show earlier
+  episodes". Titles over 40 characters get a one-step-smaller heading.
+- **Secondary rails** (Home's household column) use
+  `.section-title-sm` and quiet buttons, so the main column leads.
 - **Lists:** `list_card.html` — 16:9 collage of the first four posters,
   name, then count · sharing · last updated · owner. Three columns on
   desktop; creating a list is the page's primary button, never a card.
 - **Grids/rows:** `.media-grid` (responsive auto-fill posters),
   `.media-row` / `.landscape-row` (one row: sideways scroll on phones,
   with the next item deliberately peeking; clamped single grid row from
-  sm), `.media-row-sm` for rows inside a narrower column, `.rows` (a
+  sm), `.media-row-sm` for rows inside a narrower column. Poster density
+  is a tracker's, not a streaming homepage's: 3 columns on phones, ~170px
+  posters on desktop (5 across at 1366px, 6 at 1440px). `.rows` (a
   list grouped by spacing, hover wash per row — no hairlines).
 - **Metadata:** `.meta` renders "2024 · Movie · 2h 14m" from plain spans
   and never shows a dot at the start of a wrapped line (each item's dot
   sits in a slot that `clip-path` trims at the line start);
   `.type-dot` + `media_label`/`media_dot_class` filters for media type.
   Prefer this over badges.
-- **Chips:** `.chip` (+ `-primary/-success/-error/-info/-tv/-anime/
+- **Focus:** a 2px amber ring everywhere; inside clipping containers
+  (tab strips, sideways rows) it is drawn inset so it is never cut off.
+- **Chips:** `.chip` (12px) (+ `-primary/-success/-error/-info/-tv/-anime/
   -movie/-scrim`) only for state worth isolating: status, filler/recap,
   season finale, sync state. `.filter-chip` for removable active filters.
 - **Controls:** `.seg`/`.seg-item` segmented control (type switches),

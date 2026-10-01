@@ -11,7 +11,7 @@
     {% endfor %}
     <span class="spool-spinner self-center" aria-hidden="true"></span>
   </form>
-  <div class="text-[11.5px] text-ink-faint mt-1.5">Pre-fills the genre filter on Movies, TV, and Anime, and powers the Dashboard's "For You" row.</div>
+  <div class="text-[12px] text-ink-faint mt-1.5">Pre-fills the genre filter on Movies, TV, and Anime, and powers the Dashboard's "For You" row.</div>
 
   <div class="text-ink-dim text-xs mt-4 mb-2">Streaming services</div>
   {% comment %}
@@ -49,5 +49,5 @@
       class="text-xs text-primary hover:underline mt-1.5 cursor-pointer"
     ><span x-show="!showAllProviders">Show {{ discover_providers|length|add:"-10" }} more streaming services</span><span x-show="showAllProviders" x-cloak>Show fewer streaming services</span></button>
   {% endif %}
-  <div class="text-[11.5px] text-ink-faint mt-1.5">Pre-fills the streaming-service filter on Movies &amp; TV.</div>
+  <div class="text-[12px] text-ink-faint mt-1.5">Pre-fills the streaming-service filter on Movies &amp; TV.</div>
 </div>

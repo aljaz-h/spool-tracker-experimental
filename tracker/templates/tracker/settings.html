@@ -188,7 +188,7 @@
                 </button>
               {% endif %}
             </div>
-            <div class="text-[11.5px] text-ink-faint mb-5">JPG, PNG, or WEBP, up to 5MB. Falls back to your avatar color below when removed.</div>
+            <div class="text-[12px] text-ink-faint mb-5">JPG, PNG, or WEBP, up to 5MB. Falls back to your avatar color below when removed.</div>
 
             <label class="block text-xs text-ink-dim mb-2">Avatar color</label>
             <div class="flex flex-wrap gap-2 mb-5">
@@ -240,7 +240,7 @@
                 <span x-show="showNew" x-cloak>{% icon "eye-off" "w-4 h-4" %}</span>
               </button>
             </div>
-            <div class="text-[11.5px] text-ink-faint mb-3">Must be at least 8 characters.</div>
+            <div class="text-[12px] text-ink-faint mb-3">Must be at least 8 characters.</div>
 
             <label class="block text-xs text-ink-dim mb-1">Confirm new password</label>
             <div class="relative mb-4">
@@ -265,11 +265,11 @@
         <div class="flex gap-4">
           <div class="flex flex-col items-center gap-1.5">
             <div class="w-13 h-9 rounded-md border-2 border-primary" style="background:#14161c;"></div>
-            <span class="text-[10px] text-ink-dim">Dark</span>
+            <span class="text-xs text-ink-dim">Dark</span>
           </div>
           <div class="flex flex-col items-center gap-1.5 opacity-40 cursor-not-allowed" title="Light mode isn't available yet">
             <div class="w-13 h-9 rounded-md border-2 border-transparent" style="background:#f4f2ec;"></div>
-            <span class="text-[10px] text-ink-dim">Coming soon</span>
+            <span class="text-xs text-ink-dim">Coming soon</span>
           </div>
         </div>
 
@@ -279,7 +279,7 @@
             <span class="text-[13.5px] flex items-center gap-2">Interface animations<span class="spool-spinner" aria-hidden="true"></span></span>
             <input type="checkbox" name="animations_enabled" class="checkbox checkbox-sm" {% if profile.animations_enabled %}checked{% endif %}>
           </label>
-          <div class="text-[11.5px] text-ink-faint mt-1.5">Subtle transitions on a few interactions (mark watched, list actions, popovers). Off by default; always off if your system has reduced motion enabled, regardless of this setting.</div>
+          <div class="text-[12px] text-ink-faint mt-1.5">Subtle transitions on a few interactions (mark watched, list actions, popovers). Off by default; always off if your system has reduced motion enabled, regardless of this setting.</div>
         </form>
 
         <div class="text-ink-dim text-xs mt-4 mb-2">Time format</div>
@@ -317,7 +317,7 @@
             </select>
             <span class="spool-spinner flex-none" aria-hidden="true"></span>
           </div>
-          <div class="text-[11.5px] text-ink-faint mt-1.5">Pre-fills the language filter on Movies, TV, and Anime.</div>
+          <div class="text-[12px] text-ink-faint mt-1.5">Pre-fills the language filter on Movies, TV, and Anime.</div>
         </form>
 
         <div class="text-ink-dim text-xs mt-4 mb-2">Timezone</div>
@@ -331,7 +331,7 @@
             </select>
             <span class="spool-spinner flex-none" aria-hidden="true"></span>
           </div>
-          <div class="text-[11.5px] text-ink-faint mt-1.5">Your own timezone for times shown across the app - useful if you're not in the same timezone as the server.</div>
+          <div class="text-[12px] text-ink-faint mt-1.5">Your own timezone for times shown across the app - useful if you're not in the same timezone as the server.</div>
         </form>
 
         {% comment %}
@@ -359,7 +359,7 @@
             </select>
             <span class="spool-spinner flex-none" aria-hidden="true"></span>
           </div>
-          <div class="text-[11.5px] text-ink-faint mt-1.5">Which country's streaming availability to use for the services above.</div>
+          <div class="text-[12px] text-ink-faint mt-1.5">Which country's streaming availability to use for the services above.</div>
         </form>
       </div>
 
@@ -509,7 +509,7 @@
             </label>
             <span class="spool-spinner self-start" aria-hidden="true"></span>
           </form>
-          <div class="text-[11.5px] text-ink-faint mt-2">spool-wrapped's own per-profile delivery settings, once configured there, always take priority over these.</div>
+          <div class="text-[12px] text-ink-faint mt-2">spool-wrapped's own per-profile delivery settings, once configured there, always take priority over these.</div>
         </div>
       </div>
 
@@ -1025,7 +1025,7 @@
                     <span class="text-ink-dim">{{ entry.get_action_display|lower }}</span>
                     <span class="font-semibold">{{ entry.target_display_name }}</span>
                   </div>
-                  <span class="text-ink-faint font-mono text-[11.5px] flex-none">{{ entry.created_at|timesince }} ago</span>
+                  <span class="text-ink-faint font-mono text-[12px] flex-none">{{ entry.created_at|timesince }} ago</span>
                 </div>
               {% endfor %}
             </div>

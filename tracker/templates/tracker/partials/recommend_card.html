@@ -25,7 +25,7 @@
           {% endif %}
           <div class="flex-1 min-w-0 text-[13px] font-medium truncate">{{ op.display_name }}</div>
           {% if op.id in already_watched_profile_ids %}
-            <span class="text-[11.5px] text-ink-faint flex-none">Already watched</span>
+            <span class="text-[12px] text-ink-faint flex-none">Already watched</span>
           {% elif op.id in recommended_profile_ids %}
             {% with reply=reply_by_profile_id|get_item:op.id %}
               {% if reply %}
@@ -38,7 +38,7 @@
                   own width doesn't leave room to show it uncropped.
                 {% endcomment %}
                 <span
-                  class="flex items-center gap-1 flex-none text-[11.5px] text-success max-w-[110px] spool-tooltip"
+                  class="flex items-center gap-1 flex-none text-[12px] text-success max-w-[110px] spool-tooltip"
                   data-tooltip="{% if reply.reply_reaction %}{{ reply.get_reply_reaction_display }}{% endif %}{% if reply.reply_reaction and reply.reply_message %} – {% endif %}{% if reply.reply_message %}&ldquo;{{ reply.reply_message }}&rdquo;{% endif %}"
                 >
                   {% icon "check" "w-3.5 h-3.5 flex-none" %}
