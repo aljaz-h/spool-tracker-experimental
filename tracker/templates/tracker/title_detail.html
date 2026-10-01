@@ -441,14 +441,14 @@
             raw TMDB status string ("Returning Series" instead of
             "Ongoing", no color) this row used to just print as plain
             text - one badge, shown in the two places this page cares
-            about it, via the shared badge_color_classes filter.
+            about it, via the shared chip_color_class filter.
           {% endcomment %}
           {% firstof preview_media_type title.media_type as details_media_type %}
           <dl class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-4">
             {% if status_badge %}
               <div>
-                <div class="text-xs text-ink-faint mb-0.5">Status</div>
-                <span class="text-[13.5px] font-medium">{{ status_badge.label }}</span>
+                <div class="text-xs text-ink-faint mb-1">Status</div>
+                <span class="chip {{ status_badge.color|chip_color_class }}">{{ status_badge.label }}</span>
               </div>
             {% endif %}
             {% if details.original_language_display %}

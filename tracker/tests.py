@@ -13092,7 +13092,7 @@ class SearchViewTests(TestCase):
         with patch("tracker.integrations.tmdb.search") as mock_search:
             resp = self.client.get(reverse("search"))
         mock_search.assert_not_called()
-        self.assertContains(resp, "Type something above")
+        self.assertContains(resp, "Type a title above")
 
     @patch("tracker.integrations.tmdb.search")
     def test_matches_a_title_already_in_the_library(self, mock_search):
@@ -13126,7 +13126,7 @@ class SearchViewTests(TestCase):
             "results": [{"tmdb_id": 42, "media_type": "movie", "name": "Fathom", "year": "2020", "poster_url": None, "vote_average": 7.5, "overview": ""}]
         }
         resp = self.client.get(reverse("search"), {"q": "fathom"})
-        self.assertContains(resp, ">MOVIE<")
+        self.assertContains(resp, '<span class="type-dot bg-movie"></span>Movie</span>')
 
     @patch("tracker.integrations.tmdb.search")
     def test_tmdb_results_already_tracked_are_excluded(self, mock_search):
@@ -14087,7 +14087,7 @@ class DashboardWatchingWatchlistTests(TestCase):
         title = Title.objects.create(media_type=MediaType.MOVIE, name="Plain Link Movie", year=2020)
         WatchEvent.objects.create(profile=self.profile, title=title, watched_at=timezone.now())
         resp = self.client.get(reverse("dashboard"))
-        self.assertContains(resp, f'href="{reverse("title_detail", args=[title.pk])}" class="w-[270px] flex-none"')
+        self.assertContains(resp, f'href="{reverse("title_detail", args=[title.pk])}" class="media-card group block min-w-0"')
 
     def test_recently_watched_shows_each_episode_separately_not_deduped_by_title(self):
         from django.utils import timezone
@@ -14179,7 +14179,7 @@ class DashboardWatchingWatchlistTests(TestCase):
         watchlist = WatchList.objects.create(profile=self.profile, name="Watchlist", is_watchlist=True)
         WatchListItem.objects.create(watchlist=watchlist, title=title)
         resp = self.client.get(reverse("dashboard"))
-        self.assertContains(resp, "w-[168px]")
+        self.assertContains(resp, 'class="min-w-0 discover-tile media-card"')
 
     def test_milestone_banner_shows_on_a_streak_milestone_day(self):
         from django.utils import timezone
@@ -14208,7 +14208,7 @@ class DashboardWatchingWatchlistTests(TestCase):
         resp = self.client.get(reverse("dashboard"))
         self.assertContains(resp, f'href="{reverse("calendar")}"')
 
-    def test_mobile_scroll_rows_get_a_fade_and_arrow_overlay_not_a_scrollbar(self):
+    def test_mobile_rows_have_no_native_scrollbar_affordance(self):
         # Reported live: the header stat pills and Up Next rows showed a
         # native scrollbar on mobile instead of the edge-fade affordance
         # every other Dashboard scroll row already uses - scroll-row-fade
@@ -14224,10 +14224,12 @@ class DashboardWatchingWatchlistTests(TestCase):
             release_date=timezone.now() + timedelta(days=1),
         )
         resp = self.client.get(reverse("dashboard"))
-        content = resp.content.decode()
-        self.assertEqual(content.count("scroll-row-fade"), 2)
-        self.assertContains(resp, 'aria-label="Scroll left"')
-        self.assertContains(resp, 'aria-label="Scroll right"')
+        # Redesign: the Up Next strip is now compact rows (no sideways
+        # scroll at all), and the header stats are one plain meta line.
+        # The remaining scroll rows are .media-row/.landscape-row, whose
+        # native scrollbar is hidden in app.css (scrollbar-width: none).
+        self.assertContains(resp, "Up Next Show")
+        self.assertNotContains(resp, "scroll-row-fade")
 
     def test_footer_stats_bar_links_to_full_stats(self):
         resp = self.client.get(reverse("dashboard"))
@@ -14242,7 +14244,7 @@ class DashboardWatchingWatchlistTests(TestCase):
         self.assertEqual(resp.context["watchlist_count"], 15)
         self.assertLess(len(resp.context["watchlist_items"]), 15)
         self.assertContains(resp, "Watchlist")
-        self.assertContains(resp, "(15)")
+        self.assertContains(resp, '<span class="section-count">15</span>')
 
 
 class RecentlyWatchedStillImageTests(TestCase):
@@ -14995,7 +14997,7 @@ class ActivityViewTemplateTests(TestCase):
             WatchEvent.objects.create(profile=self.profile, title=self.show, episode=ep, watched_at=self.now - timedelta(minutes=minutes_ago))
         resp = self.client.get(reverse("activity"))
         body = resp.content.decode()
-        self.assertContains(resp, "<b>3</b> episodes")
+        self.assertContains(resp, '<b class="font-semibold text-base-content">3</b> episodes')
         self.assertContains(resp, "S1E1")
         self.assertNotIn("chevron-down", body)
         # Scoped to the feed container itself - the page's own sidebar/
@@ -15029,7 +15031,7 @@ class ActivityViewTemplateTests(TestCase):
             WatchEvent.objects.create(profile=self.profile, title=self.show, episode=ep, watched_at=self.now - timedelta(minutes=minutes_ago))
         resp = self.client.get(reverse("activity"))
         self.assertContains(resp, "Binge Session")
-        self.assertContains(resp, "bg-primary/15 text-primary")
+        self.assertContains(resp, '<span class="chip chip-primary">Binge Session</span>')
 
     def test_a_short_run_under_the_binge_threshold_gets_no_special_badge(self):
         # Reported live: 2 consecutive episodes already showed "Binge
@@ -15046,13 +15048,13 @@ class ActivityViewTemplateTests(TestCase):
         ep = Episode.objects.create(title=self.show, season=1, episode=1)
         WatchEvent.objects.create(profile=self.profile, title=self.show, episode=ep, watched_at=self.now, user_rating=9)
         resp = self.client.get(reverse("activity"))
-        self.assertContains(resp, "text-warning")
+        self.assertContains(resp, '<span class="text-primary font-semibold whitespace-nowrap">&#9733; 9/10</span>')
 
     def test_added_to_list_gets_the_secondary_accent(self):
         watchlist = WatchList.objects.create(profile=self.profile, name="Anime")
         WatchListItem.objects.create(watchlist=watchlist, title=self.show)
         resp = self.client.get(reverse("activity"))
-        self.assertContains(resp, "bg-secondary/15 text-secondary")
+        self.assertContains(resp, "<span>Added to List</span>")
 
 
 class ActivityLeaderboardHtmxTests(TestCase):
@@ -15201,8 +15203,8 @@ class TitleDetailViewTests(TestCase):
         mock_details.return_value = self._details(status="Ended")
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
         # The hero's own copy plus the Details panel's copy - both should
-        # carry the shared badge_color_classes output for "warning".
-        self.assertContains(resp, "border-warning/30 bg-warning/15 text-warning", count=2)
+        # carry the shared chip_color_class output for "warning".
+        self.assertContains(resp, '<span class="chip chip-primary">Ended</span>', count=2)
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
     @patch("tracker.integrations.tmdb.get_credits", return_value=[])
@@ -15307,7 +15309,7 @@ class TitleDetailViewTests(TestCase):
         ]
         mock_details.return_value = self._details()
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertContains(resp, '<h2 class="font-display text-xl mb-3 flex items-center gap-2">')
+        self.assertContains(resp, '<h2 class="section-title">Media</h2>')
         self.assertContains(resp, "https://img.youtube.com/vi/abc123/hqdefault.jpg")
         self.assertContains(resp, "https://image.tmdb.org/t/p/w300/a.jpg")
         self.assertContains(resp, "https://image.tmdb.org/t/p/w1280/a.jpg")  # in the lightbox's json_script data
@@ -15321,7 +15323,7 @@ class TitleDetailViewTests(TestCase):
         # get_trailer/get_backdrops both default to empty via setUp.
         mock_details.return_value = self._details()
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertNotContains(resp, '<h2 class="font-display text-xl mb-3 flex items-center gap-2">')
+        self.assertNotContains(resp, '<h2 class="section-title">Media</h2>')
         self.assertNotContains(resp, "gallery-image-urls")
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
@@ -15469,7 +15471,7 @@ class TitleDetailViewTests(TestCase):
     def test_shows_the_release_date_for_an_already_released_movie(self, mock_details, mock_credits, mock_similar):
         mock_details.return_value = self._details(release_date="2020-05-01")
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertContains(resp, ">Released</span> May 01, 2020")
+        self.assertContains(resp, "Released May 01, 2020")
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
     @patch("tracker.integrations.tmdb.get_credits", return_value=[])
@@ -15480,7 +15482,7 @@ class TitleDetailViewTests(TestCase):
         future = (timezone.localdate() + timedelta(days=30)).isoformat()
         mock_details.return_value = self._details(release_date=future)
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertContains(resp, ">Releases</span>")
+        self.assertContains(resp, "Releases ")
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
     @patch("tracker.integrations.tmdb.get_credits", return_value=[])
@@ -15521,7 +15523,7 @@ class TitleDetailViewTests(TestCase):
             "backdrop_url": None, "parts": self._collection_parts(),
         }
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertContains(resp, '<h2 class="font-display text-xl mb-3">Collection</h2>')
+        self.assertContains(resp, '<h2 class="section-title">Collection</h2>')
         self.assertContains(resp, "Iron Man 3")
         mock_collection.assert_called_once_with(131292)
 
@@ -15551,7 +15553,7 @@ class TitleDetailViewTests(TestCase):
         mock_details.return_value = self._details(collection_id=None)
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
         self.assertEqual(resp.context["collection_parts"], [])
-        self.assertNotContains(resp, '<h2 class="font-display text-xl mb-3">Collection</h2>')
+        self.assertNotContains(resp, '<h2 class="section-title">Collection</h2>')
 
     @patch("tracker.integrations.tmdb.get_collection_details")
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
@@ -15802,8 +15804,8 @@ class TitleEpisodeBrowserTests(TestCase):
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
         self.assertEqual(resp.context["episodes"][0]["aired_on"], _date(2020, 3, 4))
         self.assertIsNone(resp.context["episodes"][1]["aired_on"])
-        # Rendered in both the mobile row and the desktop card layouts.
-        self.assertContains(resp, "Mar 4, 2020", count=2)
+        # One responsive row per episode now (no separate mobile/desktop copies).
+        self.assertContains(resp, "Mar 4, 2020", count=1)
 
     @patch("tracker.integrations.tmdb.get_season_details")
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
@@ -16052,21 +16054,19 @@ class TitleEpisodeBrowserTests(TestCase):
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
     @patch("tracker.integrations.tmdb.get_credits", return_value=[])
     @patch("tracker.integrations.tmdb.get_full_details")
-    def test_mobile_and_desktop_episode_layouts_both_render_with_distinct_button_ids(
+    def test_each_episode_renders_once_with_a_single_watched_button(
         self, mock_details, mock_credits, mock_similar, mock_season, mock_tv_details
     ):
-        # The compact mobile row list and the sm:+ card grid render the
-        # same episodes twice (one hidden via CSS at any given
-        # breakpoint) - episode_watched_button.html's id_suffix keeps
-        # their button ids from colliding (see EpisodeMarkWatchedTests
-        # for the round-trip through a click).
+        # One responsive row per episode (title_episodes.html) - the old
+        # separate mobile list + desktop card grid, and the "-m" id_suffix
+        # that kept their duplicate button ids apart, are gone.
         mock_details.return_value = self._details()
         mock_season.return_value = self._season(["Freedom Day"])
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
         content = resp.content.decode()
-        self.assertIn(f'id="ep-watched-btn-{self.title.pk}-1-1"', content)
-        self.assertIn(f'id="ep-watched-btn-{self.title.pk}-1-1-m"', content)
-        self.assertEqual(content.count("Freedom Day"), 2)
+        self.assertEqual(content.count(f'id="ep-watched-btn-{self.title.pk}-1-1"'), 1)
+        self.assertNotIn(f'id="ep-watched-btn-{self.title.pk}-1-1-m"', content)
+        self.assertEqual(content.count("Freedom Day"), 1)
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
     @patch("tracker.integrations.tmdb.get_credits", return_value=[])
@@ -16114,7 +16114,7 @@ class TitleEpisodeBrowserTests(TestCase):
         }
         mock_details.return_value = details
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertContains(resp, ">Premieres</span> Sep 01, 2026")
+        self.assertContains(resp, "Premieres Sep 01, 2026")
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
     @patch("tracker.integrations.tmdb.get_credits", return_value=[])
@@ -18383,9 +18383,9 @@ class TitleTvWatchedButtonTests(TestCase):
         # the_success_button_once_the_show_is_actually_finished below).
         self._watch(1, 1)
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertContains(resp, "bg-info/90")
+        self.assertContains(resp, "bg-info hover:brightness-110")
         self.assertContains(resp, "Watching")
-        self.assertNotContains(resp, "bg-success/90")
+        self.assertNotContains(resp, "bg-success hover:brightness-110")
         self.assertNotContains(resp, "+ Mark as Watched")
 
     @patch("tracker.integrations.tmdb.get_tv_details", return_value=None)
@@ -18395,9 +18395,9 @@ class TitleTvWatchedButtonTests(TestCase):
         WatchProgress.objects.create(profile=self.profile, title=self.title, status=WatchProgress.Status.COMPLETED)
         mock_details.return_value = self._details(1)
         resp = self.client.get(reverse("title_detail", args=[self.title.pk]))
-        self.assertContains(resp, "bg-success/90")
+        self.assertContains(resp, "bg-success hover:brightness-110")
         self.assertContains(resp, "&#10003; Watched")
-        self.assertNotContains(resp, "bg-info/90")
+        self.assertNotContains(resp, "bg-info hover:brightness-110")
 
     @patch("tracker.integrations.tmdb.get_tv_details", return_value=None)
     @patch("tracker.integrations.tmdb.get_full_details")
@@ -19541,7 +19541,7 @@ class TitlePreviewViewTests(TestCase):
     def test_shows_the_release_date_same_as_the_tracked_detail_page(self, mock_details, mock_credits, mock_similar):
         mock_details.return_value = self._details(release_date="2020-05-01")
         resp = self.client.get(reverse("title_preview", args=["movie", 42]))
-        self.assertContains(resp, ">Released</span> May 01, 2020")
+        self.assertContains(resp, "Released May 01, 2020")
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
     @patch("tracker.integrations.tmdb.get_credits", return_value=[])
@@ -19604,7 +19604,7 @@ class TitlePreviewViewTests(TestCase):
             ],
         }
         resp = self.client.get(reverse("title_preview", args=["movie", 42]))
-        self.assertContains(resp, '<h2 class="font-display text-xl mb-3">Collection</h2>')
+        self.assertContains(resp, '<h2 class="section-title">Collection</h2>')
         self.assertEqual([p["tmdb_id"] for p in resp.context["collection_parts"]], [42, 10138])
 
     @patch("tracker.integrations.tmdb.get_similar", return_value=[])
@@ -19614,7 +19614,7 @@ class TitlePreviewViewTests(TestCase):
         mock_details.return_value = self._details(collection_id=None)
         resp = self.client.get(reverse("title_preview", args=["movie", 42]))
         self.assertEqual(resp.context["collection_parts"], [])
-        self.assertNotContains(resp, '<h2 class="font-display text-xl mb-3">Collection</h2>')
+        self.assertNotContains(resp, '<h2 class="section-title">Collection</h2>')
 
     def test_redirects_to_real_detail_page_if_already_tracked(self):
         title = Title.objects.create(
@@ -21433,7 +21433,7 @@ class ListDetailToolbarStaysInSyncTests(TestCase):
 
     def test_plain_request_returns_the_full_page(self):
         resp = self.client.get(reverse("list_detail", args=[self.watchlist.id]))
-        self.assertContains(resp, "All lists")
+        self.assertContains(resp, "&larr; Lists")
         self.assertContains(resp, 'id="list-page"')
 
     def test_hx_request_targeting_list_items_returns_just_the_items_partial(self):
@@ -21442,7 +21442,7 @@ class ListDetailToolbarStaysInSyncTests(TestCase):
         resp = self.client.get(
             reverse("list_detail", args=[self.watchlist.id]), HTTP_HX_REQUEST="true", HTTP_HX_TARGET="list-items"
         )
-        self.assertNotContains(resp, "All lists")
+        self.assertNotContains(resp, "&larr; Lists")
         self.assertContains(resp, 'id="list-items"')
 
     def test_switching_type_keeps_the_filters_dot_in_sync(self):
@@ -21731,7 +21731,7 @@ class HistoryTilePosterLazyLoadingTests(TestCase):
         WatchEvent.objects.create(profile=profile, title=title, watched_at=timezone.now())
 
         resp = self.client.get(reverse("history"))
-        self.assertContains(resp, '<img src="https://image.tmdb.org/t/p/w342/abc.jpg"')
+        self.assertContains(resp, '<img src="https://image.tmdb.org/t/p/w185/abc.jpg"')
         self.assertContains(resp, 'loading="lazy"')
         self.assertNotContains(resp, "background-image:url('https://image.tmdb.org/t/p/w500/abc.jpg')")
 
@@ -23802,9 +23802,12 @@ class HistoryGroupTileDropdownTests(TestCase):
         remaining = {int(part) for part in match.group(1).split(",") if part.strip().isdigit()}
         self.assertEqual(remaining, {e1.pk, e3.pk})
 
-    def test_grid_uses_the_bumped_tile_size(self):
+    def test_renders_as_a_timeline_row_not_a_poster_grid(self):
+        # Redesign: History's default view is day-grouped timeline rows;
+        # the poster grid is only used by the "by watch count" view.
         resp = self.client.get(reverse("history"))
-        self.assertContains(resp, "minmax(150px,1fr)")
+        self.assertContains(resp, "data-history-tile")
+        self.assertNotContains(resp, 'class="media-grid"')
 
 
 class TestProviderCredentialsViewTests(TestCase):
