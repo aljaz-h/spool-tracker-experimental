@@ -1,0 +1,120 @@
+# Coolify deployment. In Coolify: New Resource -> Docker Compose (from this
+# Git repo), set "Docker Compose Location" to /docker-compose.coolify.yml,
+# then assign your domain to the `web` service with port 8000
+# (e.g. https://spool.example.com:8000 - Coolify strips the port from the
+# public URL). Set the variables below in Coolify's Environment Variables
+# tab. See docs/COOLIFY.md.
+#
+# Variables marked `:?` are required - Coolify refuses to deploy without them.
+x-app-env: &app-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set a long random string}
+  DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?e.g. spool.example.com}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:?e.g. https://spool.example.com}
+  DEBUG: "False"
+  DATABASE_URL: postgres://spool:${DB_PASSWORD:?set a database password}@db:5432/spool
+  REDIS_URL: redis://redis:6379/0
+  CELERY_BROKER_URL: redis://redis:6379/0
+  CELERY_RESULT_BACKEND: redis://redis:6379/0
+  CACHE_URL: redis://redis:6379/2
+  TIME_ZONE: ${TIME_ZONE:-UTC}
+  # Coolify's proxy terminates TLS, so these are safe to default on.
+  SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-True}
+  CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-True}
+  TRAKT_CLIENT_ID: ${TRAKT_CLIENT_ID:-}
+  TRAKT_CLIENT_SECRET: ${TRAKT_CLIENT_SECRET:-}
+  SIMKL_CLIENT_ID: ${SIMKL_CLIENT_ID:-}
+  SIMKL_CLIENT_SECRET: ${SIMKL_CLIENT_SECRET:-}
+  TMDB_API_KEY: ${TMDB_API_KEY:-}
+  MDBLIST_API_KEY: ${MDBLIST_API_KEY:-}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: spool
+      POSTGRES_USER: spool
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set a database password}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spool"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *app-env
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-Admin}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
+      GUNICORN_THREADS: ${GUNICORN_THREADS:-2}
+    # No host port: Coolify's proxy (Traefik) reaches the container over
+    # its own network.
+    expose:
+      - "8000"
+    volumes:
+      - media_data:/app/media
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py bootstrap_admin &&
+             exec gunicorn spool.wsgi:application --bind 0.0.0.0:8000 --workers $${GUNICORN_WORKERS} --threads $${GUNICORN_THREADS}"
+    healthcheck:
+      # Send a Host header Django will accept - a bare localhost request is
+      # rejected (400) when DJANGO_ALLOWED_HOSTS only lists your domain.
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os, urllib.request; h = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')[0].strip().lstrip('.'); urllib.request.urlopen(urllib.request.Request('http://localhost:8000/healthz', headers={'Host': h}))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  worker:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment: *app-env
+    volumes:
+      - media_data:/app/media
+    command: celery -A spool worker -l info --concurrency=$${CELERY_WORKER_CONCURRENCY:-4}
+
+  scheduler:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment: *app-env
+    command: >
+      sh -c "python manage.py bootstrap_periodic_tasks &&
+             exec celery -A spool beat -l info"
+
+volumes:
+  db_data:
+  redis_data:
+  media_data:
