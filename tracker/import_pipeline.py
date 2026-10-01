@@ -351,7 +351,9 @@ def _commit_candidates(session):
     session.status = ImportSession.Status.IMPORTING
     if not session.started_at:
         session.started_at = timezone.now()
-    session.save(update_fields=["status", "started_at"])
+    # A resumed commit starts back in the row phase, not "finishing".
+    session.source_metadata = {k: v for k, v in session.source_metadata.items() if k != "finishing"}
+    session.save(update_fields=["status", "started_at", "source_metadata"])
 
     result = CommitResult()
     pending = session.candidates.filter(status=ImportCandidate.Status.PENDING, selected=True).order_by("id")
@@ -369,7 +371,22 @@ def _commit_candidates(session):
         session.processed_items = processed
         session.save(update_fields=["processed_items"])
 
-    _sync_downstream(session.profile, result)
+    # Every row is written at this point, but the review page would
+    # otherwise sit at "N of N processed" while the TMDB-bound downstream
+    # pass runs - report it as its own "finishing" phase instead.
+    # Stored in source_metadata (no schema change); throttled like scan
+    # progress so a fast pass doesn't write per title.
+    last_save = [0.0]
+
+    def report_finishing(done, total):
+        now = time.monotonic()
+        if done not in (0, total) and now - last_save[0] < PROGRESS_UPDATE_SECONDS:
+            return
+        last_save[0] = now
+        session.source_metadata = {**session.source_metadata, "finishing": {"done": done, "total": total}}
+        session.save(update_fields=["source_metadata"])
+
+    _sync_downstream(session.profile, result, on_progress=report_finishing)
 
     # Cumulative totals across every run of this session's commit, not
     # just this call's own result - a resumed commit (worker crash mid-
@@ -468,25 +485,40 @@ def _commit_one(session, candidate, result):
     result.touched_watch_keys.add((title.id, episode.id if episode else None))
 
 
-def _sync_downstream(profile, result):
+def _sync_downstream(profile, result, on_progress=None):
     """Exactly the batched downstream-effects pass csv_import.
     commit_rows already ran for a direct CSV commit - moved here
     unchanged so Import Review's commit path preserves the same
-    rewatch/completion/recommendation/watchlist behavior."""
+    rewatch/completion/recommendation/watchlist behavior.
+
+    on_progress(done, total) is called as titles are finished - the
+    completion/runtime pass makes TMDB calls per touched title, so on a
+    large import this phase alone can run for many minutes after every
+    row is already written."""
     from . import completion, recommendations, rewatches
 
     for title_id, episode_id in result.touched_watch_keys:
         rewatches.recompute_is_rewatch(
             profile, Title.objects.get(id=title_id), Episode.objects.get(id=episode_id) if episode_id else None
         )
+    total = len(result.touched_movies) + len(result.touched_shows)
+    done = 0
+    if on_progress:
+        on_progress(done, total)
     for title in Title.objects.filter(id__in=result.touched_movies):
         completion.update_movie_runtime(title)
         completion.sync_watchlist_removal(profile, title)
         recommendations.mark_title_watched(profile, title)
+        done += 1
+        if on_progress:
+            on_progress(done, total)
     for title in Title.objects.filter(id__in=result.touched_shows):
         completion.sync_show_completion(profile, title)
         completion.sync_watchlist_removal(profile, title)
         recommendations.mark_title_watched(profile, title)
+        done += 1
+        if on_progress:
+            on_progress(done, total)
 
 
 # --------------------------------------------------------------------
