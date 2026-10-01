@@ -56,8 +56,10 @@ services:
 
   web:
     build: .
-    # Fixed name = stable hostname for NPM's "Forward Hostname".
-    container_name: spool-web
+    # Fixed name = stable hostname for NPM's "Forward Hostname". Set
+    # WEB_CONTAINER_NAME=spool-web-dev on a second (dev) deployment so the
+    # two stacks don't collide on the shared coolify network.
+    container_name: ${WEB_CONTAINER_NAME:-spool-web}
     restart: unless-stopped
     depends_on:
       db:

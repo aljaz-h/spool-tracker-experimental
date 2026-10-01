@@ -33,6 +33,20 @@ published. Config comes from Coolify's environment variables, not a `.env`.
 5. Deploy. Postgres, Redis and uploaded media live in named volumes and
    survive redeploys. Back up `db_data`.
 
+## Running a dev instance alongside prod
+
+Deploy the same compose file as a second Coolify resource (e.g. from a
+dev branch) and set a different `WEB_CONTAINER_NAME`:
+
+| | prod | dev |
+|---|---|---|
+| `WEB_CONTAINER_NAME` | `spool-web` (default) | `spool-web-dev` |
+| NPM Forward Hostname | `spool-web` | `spool-web-dev` |
+| `DJANGO_ALLOWED_HOSTS` / `DJANGO_CSRF_TRUSTED_ORIGINS` | prod domain | dev domain |
+
+The db/redis/volumes are scoped per Coolify resource, so dev data stays
+separate from prod.
+
 Notes:
 - The first entry in `DJANGO_ALLOWED_HOSTS` is also used as the `Host`
   header for the web healthcheck, so keep your real domain first.
