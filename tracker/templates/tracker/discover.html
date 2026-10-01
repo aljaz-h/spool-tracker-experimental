@@ -4,7 +4,7 @@
 {% block content %}
 
 <div>
-  <div class="page-head !mb-5">
+  <div class="page-head !mb-6">
     <div>
       <h1 class="page-title">{{ page_title }}</h1>
       <p class="page-subtitle">Browse what's trending, popular, upcoming and top rated on TMDB{% if not is_anime and collections_enabled %}, or explore collections{% endif %}.</p>
@@ -16,7 +16,7 @@
     sub-navigation), the Filters popover trigger on the right. Active
     filters show as removable chips underneath (see below).
   {% endcomment %}
-  <div class="flex items-end justify-between gap-4 mb-5 border-b border-line">
+  <div class="flex items-end justify-between gap-4 mb-7 border-b border-line">
     {% url library_url_name category="trending" as trending_url %}
     {% url library_url_name category="popular" as popular_url %}
     {% url library_url_name category="upcoming" as upcoming_url %}
@@ -31,7 +31,7 @@
         <a href="{{ collections_url }}" class="tab-line" {% if is_collections %}aria-current="page"{% endif %}>Collections</a>
       {% endif %}
     </nav>
-    <div class="pb-1.5 flex-none">
+    <div class="pb-2 flex-none">
     {% if not is_collections %}
       {% comment %}
         A dropdown popover, not a sliding drawer - daisyUI's drawer
@@ -64,7 +64,7 @@
           this.$nextTick(() => window.positionPopover(button, this.$refs.panel, 320, false, 'right'));
         },
       }">
-        <button type="button" @click="togglePanel($el)" :aria-expanded="open.toString()" aria-haspopup="true" class="btn btn-sm btn-ghost gap-1.5 cursor-pointer text-ink-dim hover:text-base-content">
+        <button type="button" @click="togglePanel($el)" :aria-expanded="open.toString()" aria-haspopup="true" class="btn btn-sm btn-soft gap-2 cursor-pointer">
           {% icon "filter" "w-3.5 h-3.5" %}
           Filters
           {% if selected_genres or selected_providers or selected_decades or selected_runtime_bucket or request.GET.rating_from or request.GET.rating_to or selected_language or selected_certification or selected_status or selected_availability or selected_origin_country %}
@@ -429,17 +429,26 @@
     </div>
 
     {% if not is_collections %}
-      <div class="flex justify-between items-center flex-wrap gap-3 mt-10 pt-5 border-t border-line">
-        <span class="text-xs text-ink-faint">Page {{ current_page }} of {{ total_pages }}</span>
-        <div class="flex gap-1.5">
+      <nav class="flex justify-between items-center flex-wrap gap-4 mt-14" aria-label="Pagination">
+        <span class="text-[13px] text-ink-dim tabular-nums">Page {{ current_page }} of {{ total_pages }}</span>
+        <div class="flex items-center gap-1">
           {% if current_page > 1 %}
-            <a href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ current_page|add:"-1" }}" class="btn btn-sm btn-soft">&larr; Previous</a>
+            <a href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ current_page|add:"-1" }}" class="btn btn-sm btn-ghost">&larr; Previous</a>
           {% endif %}
+          {% for p in current_page|page_window:total_pages %}
+            {% if p is None %}
+              <span class="w-6 text-center text-ink-faint max-sm:hidden" aria-hidden="true">&hellip;</span>
+            {% elif p == current_page %}
+              <span class="max-sm:hidden min-w-9 h-9 px-2 inline-flex items-center justify-center rounded-lg bg-base-300 text-sm font-semibold tabular-nums" aria-current="page">{{ p }}</span>
+            {% else %}
+              <a href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ p }}" class="max-sm:hidden min-w-9 h-9 px-2 inline-flex items-center justify-center rounded-lg text-sm text-ink-dim hover:text-base-content hover:bg-base-200 tabular-nums">{{ p }}</a>
+            {% endif %}
+          {% endfor %}
           {% if current_page < total_pages %}
             <a href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ current_page|add:"1" }}" class="btn btn-sm btn-soft">Next &rarr;</a>
           {% endif %}
         </div>
-      </div>
+      </nav>
     {% endif %}
   {% endif %}
 

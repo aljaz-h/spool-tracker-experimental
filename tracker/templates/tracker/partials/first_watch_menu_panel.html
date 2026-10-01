@@ -20,7 +20,7 @@
     <span class="w-7 h-7 rounded-md bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "check" "w-4 h-4" %}</span>
     <span class="min-w-0">
       <span class="block text-[13px] font-semibold">Watched now</span>
-      <span class="block text-[11px] text-ink-faint">Log it at the current date and time</span>
+      <span class="block text-[12px] text-ink-faint">Log it at the current date and time</span>
     </span>
   </button>
 
@@ -35,7 +35,7 @@
     <span class="w-7 h-7 rounded-md bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "calendar-days" "w-4 h-4" %}</span>
     <span class="min-w-0">
       <span class="block text-[13px] font-semibold">On release date</span>
-      <span class="block text-[11px] text-ink-faint">Log it on the day it came out</span>
+      <span class="block text-[12px] text-ink-faint">Log it on the day it came out</span>
     </span>
   </button>
 
@@ -47,13 +47,13 @@
     <span class="w-7 h-7 rounded-md bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "clock" "w-4 h-4" %}</span>
     <span class="min-w-0">
       <span class="block text-[13px] font-semibold">Other date</span>
-      <span class="block text-[11px] text-ink-faint">Pick a custom date and time</span>
+      <span class="block text-[12px] text-ink-faint">Pick a custom date and time</span>
     </span>
   </button>
 </div>
 
 <div x-show="showCustom" class="px-2 pb-1 pt-1">
-  <label class="block text-[11px] text-ink-faint mb-1">Watched at</label>
+  <label class="block text-[12px] text-ink-faint mb-1">Watched at</label>
   <input type="datetime-local" name="custom_datetime" value="{% now 'Y-m-d\TH:i' %}" @keydown.enter.prevent class="input input-sm w-full mb-2">
   <div class="flex gap-1.5">
     <button type="button" @click="showCustom = false" class="btn btn-xs btn-soft flex-1">Back</button>

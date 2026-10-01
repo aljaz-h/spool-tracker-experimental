@@ -40,7 +40,7 @@
     :aria-expanded="mobileSearchOpen.toString()"
     aria-haspopup="true"
     aria-label="Search"
-    class="flex flex-col items-center justify-center gap-1 flex-1 h-14 text-[10.5px] font-medium"
+    class="flex flex-col items-center justify-center gap-1 flex-1 h-14 text-[11.5px] font-medium"
     :class="mobileSearchOpen ? 'text-primary' : 'text-ink-faint'"
   >
     {% icon "search" "w-[22px] h-[22px]" %}
@@ -52,7 +52,7 @@
     @click="bottomSheetOpen = true"
     :aria-expanded="bottomSheetOpen.toString()"
     aria-haspopup="dialog"
-    class="flex flex-col items-center justify-center gap-1 flex-1 h-14 text-[10.5px] font-medium"
+    class="flex flex-col items-center justify-center gap-1 flex-1 h-14 text-[11.5px] font-medium"
     :class="bottomSheetOpen ? 'text-primary' : 'text-ink-faint'"
   >
     {% icon "ellipsis" "w-[22px] h-[22px]" %}

@@ -13,7 +13,7 @@
           hx-post="{% url 'title_resume_watching' progress.title_id %}"
           hx-target="#history-card"
           hx-swap="outerHTML"
-          class="flex-none text-[11px] font-semibold text-primary hover:underline"
+          class="flex-none text-[12px] font-semibold text-primary hover:underline"
         >Resume watching</button>
       {% elif progress.status == "watching" %}
         <button
@@ -22,7 +22,7 @@
           hx-target="#history-card"
           hx-swap="outerHTML"
           hx-confirm="Mark &quot;{{ progress.title.name }}&quot; as dropped? Your watch history stays intact - you can resume any time."
-          class="flex-none text-[11px] font-semibold text-ink-faint hover:text-error"
+          class="flex-none text-[12px] font-semibold text-ink-faint hover:text-error"
         >Drop</button>
       {% endif %}
     </div>

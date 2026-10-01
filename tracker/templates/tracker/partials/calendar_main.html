@@ -23,13 +23,13 @@
     version made it worse, not better. Full 3-letter abbreviation comes
     back from sm: up, where there's room for it.
   {% endcomment %}
-  <span class="text-[11.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">M</span><span class="hidden sm:inline tracking-wide">Mon</span></span>
-  <span class="text-[11.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">T</span><span class="hidden sm:inline tracking-wide">Tue</span></span>
-  <span class="text-[11.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">W</span><span class="hidden sm:inline tracking-wide">Wed</span></span>
-  <span class="text-[11.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">T</span><span class="hidden sm:inline tracking-wide">Thu</span></span>
-  <span class="text-[11.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">F</span><span class="hidden sm:inline tracking-wide">Fri</span></span>
-  <span class="text-[11.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">S</span><span class="hidden sm:inline tracking-wide">Sat</span></span>
-  <span class="text-[11.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">S</span><span class="hidden sm:inline tracking-wide">Sun</span></span>
+  <span class="text-[12.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">M</span><span class="hidden sm:inline tracking-wide">Mon</span></span>
+  <span class="text-[12.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">T</span><span class="hidden sm:inline tracking-wide">Tue</span></span>
+  <span class="text-[12.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">W</span><span class="hidden sm:inline tracking-wide">Wed</span></span>
+  <span class="text-[12.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">T</span><span class="hidden sm:inline tracking-wide">Thu</span></span>
+  <span class="text-[12.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">F</span><span class="hidden sm:inline tracking-wide">Fri</span></span>
+  <span class="text-[12.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">S</span><span class="hidden sm:inline tracking-wide">Sat</span></span>
+  <span class="text-[12.5px] font-medium text-ink-faint text-center"><span class="sm:hidden">S</span><span class="hidden sm:inline tracking-wide">Sun</span></span>
 </div>
 
 <div class="grid grid-cols-7 gap-px bg-line border border-line rounded-xl overflow-hidden">
@@ -41,7 +41,7 @@
         class="relative p-1 sm:p-2 flex flex-col items-center sm:items-stretch min-h-[48px] sm:min-h-[108px] {% if not day.in_month %}bg-[#0b0d10] text-ink-faint{% else %}bg-base-100{% endif %} {% if day.items %}hover:bg-base-200{% endif %}"
         :class="selected === '{{ day.date|date:'Y-m-d' }}' ? 'shadow-[inset_0_0_0_1px_var(--color-primary)]' : ''"
       >
-        <span class="text-[11px] sm:text-[12.5px] tabular-nums {% if day.is_today %}inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-primary-content font-bold{% elif not day.in_month %}opacity-50{% else %}text-ink-dim{% endif %}">{{ day.date.day }}</span>
+        <span class="text-[12px] sm:text-[12.5px] tabular-nums {% if day.is_today %}inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-primary-content font-bold{% elif not day.in_month %}opacity-50{% else %}text-ink-dim{% endif %}">{{ day.date.day }}</span>
         {% comment %}
           Full poster thumbnails only from sm: up - a 7-column month grid
           on a ~370-400px phone leaves each cell only ~40-50px wide, far
@@ -64,7 +64,7 @@
             <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
           </div>
         {% endif %}
-        {% if day.more_count %}<div class="hidden sm:block text-[10.5px] text-ink-faint mt-1">+{{ day.more_count }} more</div>{% endif %}
+        {% if day.more_count %}<div class="hidden sm:block text-[11.5px] text-ink-faint mt-1">+{{ day.more_count }} more</div>{% endif %}
       </a>
     {% endfor %}
   {% endfor %}

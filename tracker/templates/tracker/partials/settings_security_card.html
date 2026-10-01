@@ -29,7 +29,7 @@ yet enabled (QR + manual-entry secret + a code field to confirm setup).
     <div class="grid grid-cols-2 gap-1.5 font-mono text-xs bg-base-300 rounded-lg p-3 mb-3">
       {% for code in backup_codes_to_show %}<div>{{ code }}</div>{% endfor %}
     </div>
-    <div class="text-[10.5px] text-ink-faint">Once you've saved these, reload this page - they won't be shown again after that.</div>
+    <div class="text-[11.5px] text-ink-faint">Once you've saved these, reload this page - they won't be shown again after that.</div>
 
   {% elif profile.totp_enabled %}
     <div class="flex items-center gap-2 text-sm text-success font-semibold mb-4">{% icon "shield" "w-4 h-4" %} On</div>
@@ -55,7 +55,7 @@ yet enabled (QR + manual-entry secret + a code field to confirm setup).
       <img src="{{ totp_qr_data_uri }}" alt="Scan with your authenticator app" class="w-36 h-36 rounded-lg bg-white p-2 flex-none">
       <div class="min-w-0 text-xs text-ink-dim">
         <div class="mb-2">Scan this QR code with your authenticator app, or enter this key manually:</div>
-        <div class="font-mono text-[11px] bg-base-300 rounded-lg px-2.5 py-1.5 break-all mb-3">{{ totp_secret_display }}</div>
+        <div class="font-mono text-[12px] bg-base-300 rounded-lg px-2.5 py-1.5 break-all mb-3">{{ totp_secret_display }}</div>
         <div>Then enter the 6-digit code it shows to turn 2FA on.</div>
       </div>
     </div>

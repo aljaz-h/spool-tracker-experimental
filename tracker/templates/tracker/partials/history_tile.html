@@ -5,19 +5,20 @@
 {% else %}
   {% url 'title_detail' event.title.pk as detail_url %}
 {% endif %}
-<div class="group relative flex items-center gap-3.5 py-2.5" id="hist-item-{{ event.id }}">
+<div class="group relative flex items-center gap-4 py-2 px-3 -mx-3 rounded-lg hover:bg-white/[0.03]" id="hist-item-{{ event.id }}">
   <label x-show="selecting" x-cloak class="flex-none w-5 h-5 flex items-center justify-center cursor-pointer">
     <input type="checkbox" name="event_ids" value="{{ event.id }}" @change="recount()" class="checkbox checkbox-xs checkbox-primary" aria-label="Select {{ event.title.name }}">
   </label>
-  <a href="{{ detail_url }}" class="flex items-center gap-3.5 min-w-0 flex-1" @click="if (selecting) $event.preventDefault()">
-    <div class="w-11 aspect-[2/3] rounded-md relative overflow-hidden flex-none bg-base-300 {% if not event.title.poster_url %}{{ event.title.pk|gradient_class }}{% endif %}">
+  <span class="hist-time flex-none w-[4.25rem] text-[13px] text-ink-dim tabular-nums max-sm:hidden">{{ event.watched_at|time:time_format_str }}</span>
+  <a href="{{ detail_url }}" class="flex items-center gap-4 min-w-0 flex-1" @click="if (selecting) $event.preventDefault()">
+    <div class="w-10 aspect-[2/3] rounded-md relative overflow-hidden flex-none bg-base-300 {% if not event.title.poster_url %}{{ event.title.pk|gradient_class }}{% endif %}">
       {% if event.title.poster_url %}
         <img src="{{ event.title.poster_url|poster_size:"w185" }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
       {% endif %}
     </div>
     <div class="min-w-0 flex-1">
-      <div class="text-[14px] font-medium truncate group-hover:text-white">{{ event.title.name }}</div>
-      <div class="meta meta-sm mt-0.5">
+      <div class="text-[15px] font-medium truncate group-hover:text-white">{{ event.title.name }}</div>
+      <div class="meta mt-1">
         {% if event.episode %}<span><span class="font-mono text-base-content/80">S{{ event.episode.season }}:E{{ event.episode.episode }}</span>{% if event.episode.name %} {{ event.episode.name }}{% endif %}</span>{% endif %}
         <span class="inline-flex items-center gap-1.5"><span class="type-dot {{ event.title.media_type|media_dot_class }}"></span>{{ event.title.media_type|media_label }}</span>
         {% if event.title.year %}<span>{{ event.title.year }}</span>{% endif %}
@@ -29,7 +30,7 @@
       </div>
     </div>
   </a>
-  <span class="flex-none text-xs text-ink-faint tabular-nums">{{ event.watched_at|time:time_format_str }}</span>
+  <span class="flex-none text-[13px] text-ink-dim tabular-nums sm:hidden">{{ event.watched_at|time:time_format_str }}</span>
   <button
     x-show="!selecting"
     hx-delete="/api/history/{{ event.id }}"

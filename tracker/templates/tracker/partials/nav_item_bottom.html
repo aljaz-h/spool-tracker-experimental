@@ -1,7 +1,7 @@
 {% load icons %}
 {# context: href, icon_name, label, is_active - one tab of the mobile bottom nav (bottom_nav.html). Active tab: amber icon + bright label, no filled pill. "More"/"Search" aren't built from this partial (they toggle state rather than navigate) - see bottom_nav.html's own inlined buttons, styled to match. #}
 <a href="{{ href }}" {% if is_active %}aria-current="page"{% endif %}
-   class="flex flex-col items-center justify-center gap-1 flex-1 h-14 text-[10.5px] font-medium
+   class="flex flex-col items-center justify-center gap-1 flex-1 h-14 text-[11.5px] font-medium
      {% if is_active %}text-base-content{% else %}text-ink-faint{% endif %}"
 >
   {% if is_active %}{% icon icon_name "w-[22px] h-[22px] text-primary" %}{% else %}{% icon icon_name "w-[22px] h-[22px]" %}{% endif %}

@@ -36,7 +36,7 @@
         :class="selected === '{{ group.date|date:'Y-m-d' }}' ? 'border-primary/60' : 'border-line'"
       >
         <span class="text-[13.5px] font-semibold">{% if group.date == today %}Today{% else %}{{ group.date|date:"D, M j" }}{% endif %}</span>
-        {% if group.date == today %}<span class="text-[11.5px] text-ink-faint">{{ group.date|date:"M j" }}</span>{% endif %}
+        {% if group.date == today %}<span class="text-[12.5px] text-ink-faint">{{ group.date|date:"M j" }}</span>{% endif %}
       </div>
       {% for rs in group.items %}
         <a href="{% url 'title_detail' rs.title.pk %}" class="flex items-center gap-2.5 py-1.5 group">
@@ -44,7 +44,7 @@
             {% if rs.title.poster_url %}<img src="{{ rs.title.poster_url|poster_size:"w92" }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">{% endif %}
           </div>
           <span class="min-w-0 flex-1 text-[13px] truncate {% if group.date == today %}text-base-content font-medium{% else %}text-ink-dim{% endif %} group-hover:text-base-content">{{ rs.title.name }}</span>
-          <span class="flex-none text-[11.5px] {% if rs.episode %}font-mono{% endif %} text-ink-faint">
+          <span class="flex-none text-[12.5px] {% if rs.episode %}font-mono{% endif %} text-ink-faint">
             {% if rs.episode %}S{{ rs.episode.season }} E{{ rs.episode.episode }}{% else %}{{ rs.get_release_type_display }}{% endif %}
           </span>
         </a>

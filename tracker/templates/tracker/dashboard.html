@@ -47,35 +47,16 @@
     </section>
   {% endif %}
 
-  {# ---- Up next: what's about to release for something already tracked. Compact rows, not cards. ---- #}
-  <section class="section">
-    <div class="section-head">
-      <h2 class="section-title">Up Next</h2>
-      <a href="{% url 'calendar' %}" class="section-link">Calendar &rarr;</a>
-    </div>
-    {% if up_next %}
-      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-6 gap-y-1">
-        {% for item in up_next %}
-          <a href="{% url 'title_detail' item.title.pk %}" class="flex items-center gap-3 py-2 min-w-0 group">
-            <div class="w-11 aspect-[2/3] rounded-md relative overflow-hidden flex-none bg-base-300 {% if not item.title.poster_url %}{{ item.title.pk|gradient_class }}{% endif %}">
-              {% if item.title.poster_url %}
-                <img src="{{ item.title.poster_url|poster_size:"w185" }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
-              {% endif %}
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-[11.5px] font-semibold {% if item.when == "TODAY" or item.when == "TOMORROW" %}text-primary{% else %}text-ink-faint{% endif %}">{{ item.when|title }}</div>
-              <div class="text-[13.5px] font-medium truncate group-hover:text-white">{{ item.title.name }}</div>
-              <div class="text-xs text-ink-dim truncate">{% if item.count > 1 %}<span class="text-primary font-semibold">{{ item.count }}&times;</span> {% endif %}{{ item.caption }}</div>
-            </div>
-          </a>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p class="text-sm text-ink-faint">Nothing on the horizon yet.</p>
-    {% endif %}
-  </section>
-
-  <div class="section grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px] gap-x-12 gap-y-10 items-start">
+  {% comment %}
+    Below Continue Watching, one grid for the rest of the page: a main
+    column (Recently Watched, then the watchlist, Start Watching and
+    Featured Lists) beside a 340px rail that leads with Up Next - so the
+    two "what's next" signals sit side by side at the top - followed by
+    the household material (friends' recommendations, This Month, On This
+    Day, Social Activity). Recommended closes the page as one tabbed
+    section instead of three stacked rows.
+  {% endcomment %}
+  <div class="section grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px] gap-x-12 xl:gap-x-16 gap-y-12 items-start">
     <div class="min-w-0">
       {# ---- Recently watched: this profile's own last watch events (not deduped by title - a binge shows every episode), newest first - see selectors.recently_watched(). ---- #}
       {% if recently_watched %}
@@ -97,19 +78,19 @@
           <div class="flex items-baseline gap-4 min-w-0">
             <h2 class="section-title">Watchlist Queue{% if watchlist_count %}<span class="section-count">{{ watchlist_count }}</span>{% endif %}</h2>
             {% if watchlist_items %}
-              <a href="{% url 'surprise_me' %}?next={{ request.path|urlencode }}" class="text-[13px] text-ink-dim hover:text-primary inline-flex items-center gap-1">{% icon "sparkles" "w-3.5 h-3.5" %} Surprise me</a>
+              <a href="{% url 'surprise_me' %}?next={{ request.path|urlencode }}" class="max-sm:hidden text-[13.5px] text-ink-dim hover:text-primary inline-flex items-center gap-1.5">{% icon "sparkles" "w-3.5 h-3.5" %} Surprise me</a>
             {% endif %}
           </div>
           {% if watchlist_items %}<a href="{% url 'lists' %}" class="section-link">All lists &rarr;</a>{% endif %}
         </div>
         {% if watchlist_items %}
-          <div class="media-row">
+          <div class="media-row media-row-sm">
             {% for item in watchlist_items %}
               {% include "tracker/partials/poster_card.html" with title=item.title show_ratings=True width_class="min-w-0" %}
             {% endfor %}
           </div>
         {% else %}
-          <p class="text-sm text-ink-faint">Watchlist's empty — future you will thank present you for adding something.</p>
+          <p class="text-sm text-ink-dim">Watchlist's empty — future you will thank present you for adding something.</p>
         {% endif %}
       </section>
 
@@ -119,7 +100,7 @@
           <div class="section-head">
             <h2 class="section-title">Start Watching</h2>
           </div>
-          <div class="media-row">
+          <div class="media-row media-row-sm">
             {% for title in start_watching %}
               {% include "tracker/partials/poster_card.html" with title=title show_ratings=True width_class="min-w-0" %}
             {% endfor %}
@@ -130,7 +111,35 @@
       {% include "tracker/partials/dashboard_featured_lists.html" %}
     </div>
 
-    <aside class="min-w-0 flex flex-col gap-10" aria-label="Household">
+    <aside class="min-w-0 max-lg:contents lg:flex lg:flex-col lg:gap-11" aria-label="Up next and household">
+      {# ---- Up next: what's about to release for something already tracked. A short dated list, not cards. Below lg the rail dissolves (display: contents) and this moves up to sit straight under Continue Watching. ---- #}
+      <section class="max-lg:order-first">
+        <div class="section-head">
+          <h2 class="section-title">Up Next</h2>
+          <a href="{% url 'calendar' %}" class="section-link">Calendar &rarr;</a>
+        </div>
+        {% if up_next %}
+          <div class="flex flex-col gap-1 -mx-2">
+            {% for item in up_next|slice:":6" %}
+              <a href="{% url 'title_detail' item.title.pk %}" class="flex items-center gap-3.5 p-2 rounded-lg min-w-0 group hover:bg-white/[0.03]">
+                <div class="w-11 aspect-[2/3] rounded-md relative overflow-hidden flex-none bg-base-300 {% if not item.title.poster_url %}{{ item.title.pk|gradient_class }}{% endif %}">
+                  {% if item.title.poster_url %}
+                    <img src="{{ item.title.poster_url|poster_size:"w185" }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
+                  {% endif %}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-[14px] font-medium truncate group-hover:text-white">{{ item.title.name }}</div>
+                  <div class="text-[13px] text-ink-dim truncate mt-0.5">{% if item.count > 1 %}<span class="text-primary font-semibold">{{ item.count }}&times;</span> {% endif %}{{ item.caption }}</div>
+                </div>
+                <div class="flex-none text-right text-[12.5px] font-semibold tabular-nums {% if item.when == "TODAY" or item.when == "TOMORROW" %}text-primary{% else %}text-ink-dim{% endif %}">{{ item.when|title }}</div>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-sm text-ink-dim">Nothing on the horizon yet.</p>
+        {% endif %}
+      </section>
+
       {# ---- Recommended to you by real people in the household - one card, paged. ---- #}
       {% include "tracker/partials/dashboard_recommendations.html" %}
 
@@ -167,21 +176,42 @@
     </aside>
   </div>
 
-  {# ---- Recommended for You: one row per Movies/TV/Anime, TMDB's "similar to X" recommendations aggregated across this profile's recent history, falling back to a genre/provider preference discover() for a profile with no history yet - see selectors.recommended_for_you(). ---- #}
-  {% for row_title, row in recommended_rows %}
-    {% if row %}
-      <section class="section">
-        <div class="section-head">
-          <h2 class="section-title">{{ row_title }}</h2>
-        </div>
-        <div class="media-row">
-          {% for item in row.results %}
-            {% include "tracker/partials/discover_tile.html" with item=item %}
+  {% comment %}
+    Recommended for You: TMDB's "similar to X" recommendations aggregated
+    across this profile's recent history, falling back to a genre/provider
+    preference discover() for a profile with no history yet - see
+    selectors.recommended_for_you(). One section, one row at a time:
+    Movies/TV/Anime are tabs over panels that are all already rendered
+    (no extra request), and the first non-empty row is shown first.
+  {% endcomment %}
+  {% with r0=recommended_rows.0.1 r1=recommended_rows.1.1 r2=recommended_rows.2.1 %}
+  {% if r0 or r1 or r2 %}
+    <section class="section" x-data="{ rec: {% if r0 %}0{% elif r1 %}1{% else %}2{% endif %} }">
+      <div class="section-head items-center">
+        <h2 class="section-title">Recommended for You</h2>
+        <div class="seg" role="tablist" aria-label="Recommendation type">
+          {% for row_title, row in recommended_rows %}
+            {% if row %}
+              <button type="button" role="tab" class="seg-item" :class="rec === {{ forloop.counter0 }} && 'is-active'" :aria-selected="(rec === {{ forloop.counter0 }}).toString()" @click="rec = {{ forloop.counter0 }}">{{ row_title|cut:"Recommended " }}</button>
+            {% endif %}
           {% endfor %}
         </div>
-      </section>
-    {% endif %}
-  {% endfor %}
+      </div>
+      {% for row_title, row in recommended_rows %}
+        {% if row %}
+          <div x-show="rec === {{ forloop.counter0 }}" {% if not forloop.first %}x-cloak{% endif %} role="tabpanel" aria-label="{{ row_title }}">
+            <h3 class="sr-only">{{ row_title }}</h3>
+            <div class="media-row">
+              {% for item in row.results %}
+                {% include "tracker/partials/discover_tile.html" with item=item %}
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </section>
+  {% endif %}
+  {% endwith %}
 {% endif %}
 
 {% endblock %}

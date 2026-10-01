@@ -40,8 +40,8 @@ Never hard-code hexes in templates.
 | `base-300` | `#1f2229` | Raised/hover, progress tracks, chips |
 | `line` | `#262930` | The one hairline color |
 | `ink` / `base-content` | `#eceef2` | Primary text |
-| `ink-dim` | `#9b9fae` | Secondary text, metadata |
-| `ink-faint` | `#646979` | Tertiary text, placeholders |
+| `ink-dim` | `#a6aab8` | Secondary text, metadata |
+| `ink-faint` | `#737887` | Tertiary text, placeholders |
 | `primary` | `#e8a63c` | Spool amber — active nav, primary CTA, progress, focus, selection |
 | `movie` / `tv` / `anime` | amber / `#8b85d6` / `#3fa9a0` | Media type — dots, chart series, split bars |
 | `success` / `error` / `info` | `#5bd58a` / `#f0604a` / `#6fb7ce` | Watched/complete, destructive, informational/in progress |
@@ -57,8 +57,12 @@ own scores.
 
 - **Public Sans** for the whole interface, headings included
   (`--font-display` is Public Sans now). Page title `.page-title`
-  28–32px/700; section heading `.section-title` 18–20px/650; card title
-  `.media-title` 14px/600; metadata 12–13px `ink-dim`; body 13–15px.
+  28px phone / 33px desktop, 700; section heading `.section-title`
+  19/21px, 650; media/card title 15px/600; body 14–15px; metadata 13px
+  `ink-dim`. `text-xs` is remapped to 12.5px, so tiny text (11–12px) is
+  reserved for chips, badges and keyboard hints.
+- Hierarchy comes from size *and* tone: titles in `base-content`,
+  metadata in `ink-dim`, only truly tertiary text in `ink-faint`.
 - **Bebas Neue** (`.font-brand`) only for the SPOOL wordmark.
 - **JetBrains Mono** only for episode codes (`S01E04`), timestamps where
   alignment matters, and technical values (API keys, versions). Ordinary
@@ -75,6 +79,13 @@ controls and avatars. Shadows only on floating things — menus/popovers
 
 ## 5. Shell
 
+- **Application grid** (tokens in `app.css` `@theme`): sidebar
+  `--spacing-sidebar` 216px (68px collapsed), top bar
+  `--spacing-topbar` 60px desktop / 56px phone, content gutters 16 / 24 /
+  40px (phone / tablet / desktop, set once on `.page`), content capped at
+  1480px. Main + rail layouts use one shape everywhere: `minmax(0,1fr)`
+  plus a 288–340px rail with a 48–64px gap (Home, title pages, Activity).
+  Sections are 44px apart on phones, 56px on desktop.
 - **Desktop (lg+):** slim left sidebar (`sidebar.html`) — wordmark, Home,
   Browse (Movies/TV/Anime), Library (Calendar/History/Lists/Stats/
   Activity), Settings at the bottom. Muted by default; active item gets a
@@ -84,9 +95,10 @@ controls and avatars. Shadows only on floating things — menus/popovers
   household friends, profile menu. No navigation links duplicated here.
 - **Below lg:** docked bottom nav (Home, Browse, Calendar, Search, More)
   plus the More sheet; the top bar keeps the wordmark and account icons.
-- **Content width:** `.page` caps at 1560px with responsive padding;
-  reading-heavy pages (History, Activity feed, Notifications, Settings)
-  constrain themselves further.
+- **Content width:** `.page` caps content at 1480px and owns the gutters;
+  reading-heavy pages (History, Activity, Notifications, Settings)
+  constrain themselves further. Pages never re-add their own side
+  padding.
 
 ## 6. Components (app.css)
 
@@ -103,10 +115,25 @@ controls and avatars. Shadows only on floating things — menus/popovers
 - **Landscape cards:** Continue Watching (`poster_card.html` with
   `progress`) and Recently Watched (`watch_event_card.html`) — 16:9 art,
   bottom scrim with title/episode, 3px amber progress line.
+- **Title page:** composed hero (backdrop region ~420px desktop, poster
+  set into it; on phones the poster sits beside the title and everything
+  else runs full width), then a sticky detail nav — Overview / Episodes
+  / Cast & Crew / Details / Your activity — over the main column and a
+  sticky rail (rating, where to watch, recommend). Tabs are Alpine state
+  mirrored to the URL hash; every panel stays in the DOM so HTMX targets
+  keep working. Shows open on Episodes, movies on Overview. Long seasons
+  show 12 episodes plus "Show all".
+- **Lists:** `list_card.html` — 16:9 collage of the first four posters,
+  name, then count · sharing · last updated · owner. Three columns on
+  desktop; creating a list is the page's primary button, never a card.
 - **Grids/rows:** `.media-grid` (responsive auto-fill posters),
   `.media-row` / `.landscape-row` (one row: sideways scroll on phones,
-  clamped single grid row from sm), `.rows` (hairline-separated list).
-- **Metadata:** `.meta` renders "2024 · Movie · 2h 14m" from plain spans;
+  with the next item deliberately peeking; clamped single grid row from
+  sm), `.media-row-sm` for rows inside a narrower column, `.rows` (a
+  list grouped by spacing, hover wash per row — no hairlines).
+- **Metadata:** `.meta` renders "2024 · Movie · 2h 14m" from plain spans
+  and never shows a dot at the start of a wrapped line (each item's dot
+  sits in a slot that `clip-path` trims at the line start);
   `.type-dot` + `media_label`/`media_dot_class` filters for media type.
   Prefer this over badges.
 - **Chips:** `.chip` (+ `-primary/-success/-error/-info/-tv/-anime/
@@ -131,6 +158,8 @@ controls and avatars. Shadows only on floating things — menus/popovers
 - No light mode, no pure black, no fourth media-type color.
 - No bordered card around every section, no cards inside cards, no
   uppercase metadata pills where a `.meta` line would do.
+- No hairline between every row or section — spacing groups; a border
+  is for real navigation edges (tabs, the shell) or form grouping.
 - No glow, neon, glassmorphism, large decorative gradients or blobs.
 - No idle/looping animation; nothing that moves unless the user acted.
 - No AI-copy clichés; Spool's copy stays plain and specific.

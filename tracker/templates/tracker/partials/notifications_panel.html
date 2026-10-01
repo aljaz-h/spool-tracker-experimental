@@ -61,13 +61,13 @@
           <div class="px-3 py-8 text-center text-ink-faint text-xs">Nothing here yet.</div>
         {% endif %}
         {% for group in groups.personal.recent %}
-          <div class="px-3 pt-3 pb-1 text-[11.5px] font-semibold text-ink-dim">{{ group.date|notif_day_label }}</div>
+          <div class="px-3 pt-3 pb-1 text-[12.5px] font-semibold text-ink-dim">{{ group.date|notif_day_label }}</div>
           {% for n in group.items %}{% include "tracker/partials/notification_row.html" with n=n %}{% endfor %}
         {% endfor %}
         {% if groups.personal.upcoming %}
-          <div class="px-3 pt-3 pb-1 mt-1 text-[11.5px] font-semibold text-ink-dim border-t border-line">Upcoming</div>
+          <div class="px-3 pt-3 pb-1 mt-1 text-[12.5px] font-semibold text-ink-dim border-t border-line">Upcoming</div>
           {% for group in groups.personal.upcoming %}
-            <div class="px-3 py-1 text-[11px] font-semibold text-ink-dim">{{ group.date|notif_day_label }}</div>
+            <div class="px-3 py-1 text-[12px] font-semibold text-ink-dim">{{ group.date|notif_day_label }}</div>
             {% for n in group.items %}{% include "tracker/partials/notification_row.html" with n=n %}{% endfor %}
           {% endfor %}
         {% endif %}
@@ -77,7 +77,7 @@
           <div class="px-3 py-8 text-center text-ink-faint text-xs">Nothing here yet.</div>
         {% endif %}
         {% for group in groups.system.recent %}
-          <div class="px-3 pt-3 pb-1 text-[11.5px] font-semibold text-ink-dim">{{ group.date|notif_day_label }}</div>
+          <div class="px-3 pt-3 pb-1 text-[12.5px] font-semibold text-ink-dim">{{ group.date|notif_day_label }}</div>
           {% for n in group.items %}{% include "tracker/partials/notification_row.html" with n=n %}{% endfor %}
         {% endfor %}
       </div>

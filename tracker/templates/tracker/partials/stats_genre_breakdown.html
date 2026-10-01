@@ -65,7 +65,7 @@ real navigation.
         {% for g in genre_breakdown %}
           <div
             tabindex="0" aria-label="{{ g.name }} · {{ g.display }}"
-            class="h-full flex items-center justify-center text-[11px] font-semibold text-black/75 min-w-0 spool-tooltip"
+            class="h-full flex items-center justify-center text-[12px] font-semibold text-black/75 min-w-0 spool-tooltip"
             style="flex-grow:{{ g.pct }};flex-basis:0;background:{{ forloop.counter0|color_at_index }}"
             data-tooltip="{{ g.name }} · {{ g.display }}"
           >{% if g.pct >= 6 %}{{ g.pct }}%{% endif %}</div>

@@ -389,7 +389,10 @@
       target.classList.add('episode-card-highlight');
       setTimeout(() => target.classList.remove('episode-card-highlight'), 2000);
     }
-    document.addEventListener('DOMContentLoaded', scrollToEpisodeAnchor);
+    // After Alpine, not on DOMContentLoaded: title_detail.html's tabs and
+    // title_episodes.html's "Show all" collapse both decide from the hash
+    // which episode row is visible, so scrolling has to wait for them.
+    document.addEventListener('alpine:initialized', () => requestAnimationFrame(scrollToEpisodeAnchor));
     // htmx's documented custom-confirm recipe: intercept the cancelable
     // htmx:confirm event and only call issueRequest(true) (proceeding
     // with the original request) once the dialog above resolves true.
@@ -437,7 +440,7 @@
     {% include "tracker/partials/sidebar.html" %}
     <div class="app-content">
       {% include "tracker/partials/topbar.html" %}
-      <main id="main" class="page flex-1 px-4 sm:px-6 lg:px-8 xl:px-10 pt-5 sm:pt-7 lg:pt-8 pb-28 lg:pb-16">
+      <main id="main" class="page flex-1 pt-6 sm:pt-8 lg:pt-10 pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-20">
         {% include "tracker/partials/discover_type_switcher.html" %}
         {% block content %}{% endblock %}
       </main>

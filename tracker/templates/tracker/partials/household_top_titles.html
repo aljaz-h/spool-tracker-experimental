@@ -16,7 +16,7 @@
           </div>
           <div class="min-w-0 flex-1">
             <div class="text-[13.5px] font-medium truncate group-hover:text-white">{{ row.title.name }}</div>
-            <div class="text-[11px] text-ink-faint">{{ row.count }} play{{ row.count|pluralize }} logged this week</div>
+            <div class="text-[12px] text-ink-faint">{{ row.count }} play{{ row.count|pluralize }} logged this week</div>
             <div class="flex items-center -space-x-1 mt-1">
               {% for watcher in row.watchers|slice:":5" %}
                 {% if watcher.avatar_image %}

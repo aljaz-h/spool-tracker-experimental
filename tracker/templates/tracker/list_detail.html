@@ -44,7 +44,7 @@
           {% if can_edit %}
             <button
               type="button" @click="editingTags = true" x-show="!editingTags"
-              class="text-[11px] text-ink-faint hover:text-base-content underline decoration-dotted underline-offset-2"
+              class="text-[12px] text-ink-faint hover:text-base-content underline decoration-dotted underline-offset-2"
             >{% if watchlist.tags %}edit tags{% else %}+ add tags{% endif %}</button>
             <form
               method="post" action="{% url 'update_list_tags' watchlist.id %}"
@@ -56,7 +56,7 @@
                 placeholder="comfort watches, in progress"
                 class="input input-xs w-56"
               >
-              <button type="submit" class="text-[11px] font-semibold text-primary hover:underline">Save</button>
+              <button type="submit" class="text-[12px] font-semibold text-primary hover:underline">Save</button>
             </form>
           {% endif %}
         </div>

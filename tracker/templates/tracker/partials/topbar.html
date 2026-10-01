@@ -1,6 +1,6 @@
 {% load icons tracker_extras %}
 {% with url_name=request.resolver_match.url_name %}
-<header class="h-14 flex-none sticky top-0 z-30 bg-base-100/95 border-b border-line">
+<header class="h-14 lg:h-15 flex-none sticky top-0 z-30 bg-base-100/95 border-b border-line">
   {% comment %}
     Slim top bar: page-level utilities only (search, notifications,
     friends, profile). Primary navigation lives in the sidebar (lg: and
@@ -11,7 +11,7 @@
     the right-hand icon cluster always stays pinned to the right edge,
     whether or not the desktop search column renders.
   {% endcomment %}
-  <div class="page h-full px-4 sm:px-6 lg:px-8 xl:px-10 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+  <div class="page h-full grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
   <div class="flex items-center min-w-0 justify-self-start col-start-1">
     <a href="{% url 'dashboard' %}" class="lg:hidden flex items-center flex-none" title="Home">
       <span class="font-brand text-[26px] text-marquee leading-none">SPOOL</span>
@@ -19,7 +19,7 @@
   </div>
 
   <div class="hidden lg:flex min-w-0 col-start-2">
-    <form method="get" action="{% url 'search' %}" role="search" class="field w-full max-w-[440px] h-9 rounded-lg">
+    <form method="get" action="{% url 'search' %}" role="search" class="field w-full max-w-[480px] h-10 rounded-lg">
       {% icon "search" "w-4 h-4 text-ink-faint flex-none" %}
       <input
         type="text" name="q" value="{{ request.GET.q }}"
@@ -28,7 +28,7 @@
         autocomplete="off"
         placeholder="Search movies, shows, anime, people…"
       >
-      <kbd class="hidden xl:inline-flex items-center h-5 px-1.5 rounded border border-line text-[10.5px] font-mono text-ink-faint">/</kbd>
+      <kbd class="hidden xl:inline-flex items-center h-5 px-1.5 rounded border border-line text-[11.5px] font-mono text-ink-faint">/</kbd>
     </form>
   </div>
 
@@ -139,7 +139,7 @@
               >{% if not p.avatar_image %}{{ p.display_name|first|upper }}{% endif %}</div>
               <div class="min-w-0 flex-1">
                 <div class="text-sm font-medium truncate">{{ p.display_name }}</div>
-                <div class="text-[11px] text-ink-faint">{% if p.last_seen_at %}Active {{ p.last_seen_at|timesince }} ago{% else %}No activity yet{% endif %}</div>
+                <div class="text-[12px] text-ink-faint">{% if p.last_seen_at %}Active {{ p.last_seen_at|timesince }} ago{% else %}No activity yet{% endif %}</div>
               </div>
             </button>
           {% endfor %}

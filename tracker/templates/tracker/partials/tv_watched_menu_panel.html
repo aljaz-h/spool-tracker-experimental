@@ -12,7 +12,7 @@
   <span class="w-7 h-7 rounded-md bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "history" "w-4 h-4" %}</span>
   <span class="min-w-0">
     <span class="block text-[13px] font-semibold">View history plays</span>
-    <span class="block text-[11px] text-ink-faint">See all your past watches</span>
+    <span class="block text-[12px] text-ink-faint">See all your past watches</span>
   </span>
 </a>
 
@@ -26,7 +26,7 @@
     <span class="w-7 h-7 rounded-md bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "eye" "w-4 h-4" %}</span>
     <span class="min-w-0">
       <span class="block text-[13px] font-semibold">Watch all seasons again</span>
-      <span class="block text-[11px] text-ink-faint">Add another play to every episode</span>
+      <span class="block text-[12px] text-ink-faint">Add another play to every episode</span>
     </span>
   </button>
   <button type="button"
@@ -38,7 +38,7 @@
     <span class="w-7 h-7 rounded-md bg-error/15 flex items-center justify-center flex-none text-error">{% icon "trash-2" "w-4 h-4" %}</span>
     <span class="min-w-0">
       <span class="block text-[13px] font-semibold">Unmark all seasons watched</span>
-      <span class="block text-[11px] text-ink-faint">Remove every episode play</span>
+      <span class="block text-[12px] text-ink-faint">Remove every episode play</span>
     </span>
   </button>
 {% else %}
@@ -51,20 +51,20 @@
     <span class="w-7 h-7 rounded-md bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "check" "w-4 h-4" %}</span>
     <span class="min-w-0">
       <span class="block text-[13px] font-semibold">Mark all seasons watched</span>
-      <span class="block text-[11px] text-ink-faint">Every episode, every season</span>
+      <span class="block text-[12px] text-ink-faint">Every episode, every season</span>
     </span>
   </button>
 {% endif %}
 
 {% if season_cards|length > 1 %}
   <div class="border-t border-line mt-1 pt-1.5">
-    <div class="px-2 pb-1 text-[10.5px] font-semibold text-ink-faint uppercase tracking-wide">By season</div>
+    <div class="px-2 pb-1 text-[11.5px] font-semibold text-ink-faint uppercase tracking-wide">By season</div>
     <div class="max-h-52 overflow-y-auto flex flex-col gap-0.5 pr-0.5">
       {% for card in season_cards %}
         <div class="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-base-300">
           <div class="min-w-0 text-[12.5px] truncate">
             <span class="font-semibold">Season {{ card.number }}</span>
-            {% if card.total_episodes %}<span class="text-ink-faint font-mono text-[11px] ml-1.5">{{ card.watched_count }}/{{ card.total_episodes }}</span>{% endif %}
+            {% if card.total_episodes %}<span class="text-ink-faint font-mono text-[12px] ml-1.5">{{ card.watched_count }}/{{ card.total_episodes }}</span>{% endif %}
           </div>
           <div class="flex items-center gap-1 flex-none">
             {% if card.total_episodes and card.watched_count == card.total_episodes %}

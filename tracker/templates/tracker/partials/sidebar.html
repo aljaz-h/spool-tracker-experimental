@@ -9,10 +9,10 @@
 {% endcomment %}
 {% with url_name=request.resolver_match.url_name %}
 <aside
-  class="app-sidebar hidden lg:flex fixed inset-y-0 left-0 z-40 w-60 flex-col bg-[#0b0d10] border-r border-line"
+  class="app-sidebar hidden lg:flex fixed inset-y-0 left-0 z-40 w-(--spacing-sidebar) flex-col bg-[#0b0d10] border-r border-line"
   aria-label="Sidebar"
 >
-  <div class="flex items-center justify-between h-14 px-4 flex-none">
+  <div class="flex items-center justify-between h-15 px-5 flex-none">
     <a href="{% url 'dashboard' %}" class="nav-wordmark flex items-center" title="Home">
       <span class="font-brand text-[26px] leading-none text-marquee">SPOOL</span>
     </a>
@@ -57,7 +57,7 @@
   <div class="flex-none px-3 pb-3 pt-2 border-t border-line">
     {% url 'settings' as settings_url %}
     {% include "tracker/partials/nav_item.html" with href=settings_url icon_name="settings" label="Settings" is_active=url_name|eq:"settings" %}
-    <div class="nav-footer mt-3 px-3 text-[11px] text-ink-faint leading-relaxed">
+    <div class="nav-footer mt-3 px-3 text-[12px] text-ink-faint leading-relaxed">
       <div>{{ all_profiles|length }} profile{{ all_profiles|length|pluralize }} on this server · <span class="font-mono">v{{ app_version }}</span></div>
       {# Movie/TV/anime metadata credit - TMDB's own terms require this; Jikan/MAL's and AniFiller's are the same courtesy for filler/recap data. #}
       <div class="mt-1">

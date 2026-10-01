@@ -21,9 +21,9 @@
   <div class="empty"><div class="empty-title">Nothing here yet</div>No history matches these filters — yet.</div>
 {% else %}
   {% for group in day_groups %}
-    <div class="flex justify-between items-baseline gap-4 {% if not forloop.first %}mt-9{% endif %} pb-2 border-b border-line">
-      <h2 class="text-[15px] font-semibold">{{ group.date|day_header }}</h2>
-      <div class="text-xs text-ink-faint">
+    <div class="sticky top-14 lg:top-15 z-10 bg-base-100 flex justify-between items-baseline gap-4 {% if not forloop.first %}mt-8{% endif %} pt-3 pb-2">
+      <h2 class="text-[17px] font-semibold">{{ group.date|day_header }}</h2>
+      <div class="text-[13px] text-ink-dim">
         {% if group.movie_count %}{{ group.movie_count }} movie{{ group.movie_count|pluralize }}{% endif %}
         {% if group.movie_count and group.episode_count %}·{% endif %}
         {% if group.episode_count %}{{ group.episode_count }} episode{{ group.episode_count|pluralize }}{% endif %}
@@ -42,8 +42,8 @@
   {% endfor %}
 {% endif %}
 {% if profile and page_obj and page_obj.paginator.count %}
-  <div class="flex justify-between items-center flex-wrap gap-3 mt-10 pt-5 border-t border-line">
-    <span class="text-xs text-ink-faint">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} {% if grouped_by_watch_count %}title{{ page_obj.paginator.count|pluralize }}{% else %}day{{ page_obj.paginator.count|pluralize }}{% endif %}</span>
+  <div class="flex justify-between items-center flex-wrap gap-3 mt-12">
+    <span class="text-[13px] text-ink-dim">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} {% if grouped_by_watch_count %}title{{ page_obj.paginator.count|pluralize }}{% else %}day{{ page_obj.paginator.count|pluralize }}{% endif %}</span>
     <div class="flex gap-1.5">
       {% if page_obj.has_previous %}
         <a hx-get="?{{ base_query }}&page={{ page_obj.previous_page_number }}" hx-target="#history-content" hx-push-url="true"

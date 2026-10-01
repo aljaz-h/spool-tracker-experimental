@@ -68,7 +68,7 @@ to avoid triggering navigation.
           hx-swap="outerHTML swap:150ms"
           title="Drop - keeps your watch history, just leaves Watching"
           aria-label="Drop"
-          class="h-7 px-2 rounded-md bg-black/75 text-white/85 text-[11px] font-semibold flex items-center hover:bg-black/90 hover:text-white"
+          class="h-7 px-2 rounded-md bg-black/75 text-white/85 text-[12px] font-semibold flex items-center hover:bg-black/90 hover:text-white"
         >Drop</button>
         <button
           type="button"
@@ -123,7 +123,7 @@ to avoid triggering navigation.
             {% else %}
               <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-semibold flex-none" style="background:{{ event_profile.avatar_color }};color:#fff;">{{ event_profile.display_name|first|upper }}</span>
             {% endif %}
-            <span class="text-[10.5px] font-semibold text-white truncate">{{ event_profile.display_name }}</span>
+            <span class="text-[11.5px] font-semibold text-white truncate">{{ event_profile.display_name }}</span>
           </span>
         {% endif %}
       </a>

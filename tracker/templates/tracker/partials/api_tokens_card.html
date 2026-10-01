@@ -24,7 +24,7 @@
         <input
           :type="show ? 'text' : 'password'" readonly value="{{ token.token }}"
           onclick="this.select()" aria-label="{{ token.name }} token"
-          class="w-full bg-transparent text-[11px] font-mono text-ink-dim focus:outline-none cursor-text"
+          class="w-full bg-transparent text-[12px] font-mono text-ink-dim focus:outline-none cursor-text"
         >
       </div>
       <button type="button" @click="show = !show" title="Show/hide token" class="text-ink-faint hover:text-base-content p-1.5 flex-none">
@@ -67,6 +67,6 @@
       <button type="submit" class="btn btn-sm btn-primary flex-none">+ Add token</button>
     </form>
   {% else %}
-    <div class="text-[10.5px] text-ink-faint mt-3 pt-3 border-t border-line">{{ max_api_tokens }} of {{ max_api_tokens }} tokens used - delete one to add another.</div>
+    <div class="text-[11.5px] text-ink-faint mt-3 pt-3 border-t border-line">{{ max_api_tokens }} of {{ max_api_tokens }} tokens used - delete one to add another.</div>
   {% endif %}
 </div>

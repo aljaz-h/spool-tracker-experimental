@@ -1,6 +1,6 @@
 {% load icons tracker_extras %}
 {# context: item (one entry from selectors.activity_feed() - watched/rated/added_to_list, or a *_group collapsed summary) #}
-<div class="flex gap-3.5 py-3.5">
+<div class="flex gap-4 py-3.5 px-3 -mx-3 rounded-lg hover:bg-white/[0.025]">
   <div class="flex flex-col items-center flex-none w-9">
     {% comment %}
     Opens the same profile_popup_modal the header's own Friends dropdown
@@ -23,7 +23,7 @@
         <div class="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-semibold" style="background:{{ item.profile.avatar_color }};color:#fff;">{{ item.profile.display_name|first|upper }}</div>
       {% endif %}
     </button>
-    <span class="text-[11px] text-ink-faint mt-1.5 whitespace-nowrap tabular-nums">{{ item.timestamp|time:time_format_str }}</span>
+    <span class="text-[12px] text-ink-faint mt-1.5 whitespace-nowrap tabular-nums">{{ item.timestamp|time:time_format_str }}</span>
   </div>
 
   <div class="flex-1 min-w-0 flex gap-3.5">
@@ -39,7 +39,7 @@
         {% endif %}
       </a>
       <div class="min-w-0 flex-1">
-        <div class="text-[14px] text-ink-dim leading-snug">
+        <div class="text-[15px] text-ink-dim leading-snug">
           <b class="font-semibold text-base-content">{{ item.profile.display_name }}</b>
           {% if item.kind == "rated" %}rated{% else %}watched{% endif %}
           <a href="{{ detail_url }}" class="font-semibold text-base-content hover:text-white">{{ item.title.name }}</a>
@@ -59,7 +59,7 @@
         {% endif %}
       </a>
       <div class="min-w-0 flex-1">
-        <div class="text-[14px] text-ink-dim leading-snug"><b class="font-semibold text-base-content">{{ item.profile.display_name }}</b> watched <b class="font-semibold text-base-content">{{ item.count }}</b> episodes of <a href="{% url 'title_detail' item.title.pk %}" class="font-semibold text-base-content hover:text-white">{{ item.title.name }}</a></div>
+        <div class="text-[15px] text-ink-dim leading-snug"><b class="font-semibold text-base-content">{{ item.profile.display_name }}</b> watched <b class="font-semibold text-base-content">{{ item.count }}</b> episodes of <a href="{% url 'title_detail' item.title.pk %}" class="font-semibold text-base-content hover:text-white">{{ item.title.name }}</a></div>
         <div class="meta meta-sm mt-1">
           <span class="font-mono">{{ item.range_label }}</span>
           {% if item.total_episodes %}<span>{{ item.count }}/{{ item.total_episodes }} episodes</span>{% endif %}
@@ -83,7 +83,7 @@
         {% endfor %}
       </div>
       <div class="min-w-0 flex-1">
-        <div class="text-[14px] text-ink-dim leading-snug"><b class="font-semibold text-base-content">{{ item.profile.display_name }}</b> watched <b class="font-semibold text-base-content">{{ item.count }}</b> movies</div>
+        <div class="text-[15px] text-ink-dim leading-snug"><b class="font-semibold text-base-content">{{ item.profile.display_name }}</b> watched <b class="font-semibold text-base-content">{{ item.count }}</b> movies</div>
         <div class="text-[12.5px] text-ink-dim truncate mt-1">{% for m in item.movies %}{{ m.title.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
         <div class="mt-2 flex items-center gap-2"><span class="chip chip-primary">Movie Marathon</span>{% if item.total_runtime_display %}<span class="text-xs text-ink-faint">{{ item.total_runtime_display }} total</span>{% endif %}</div>
       </div>
@@ -107,7 +107,7 @@
         {% endif %}
       </div>
       <div class="min-w-0 flex-1">
-        <div class="text-[14px] text-ink-dim leading-snug">
+        <div class="text-[15px] text-ink-dim leading-snug">
           <b class="font-semibold text-base-content">{{ item.profile.display_name }}</b> added
           {% if item.kind == "added_to_list_group" %}<b class="font-semibold text-base-content">{{ item.count }}</b> titles to{% else %}<b class="font-semibold text-base-content">{{ item.title.name }}</b> to{% endif %}
           <a href="{% url 'list_detail' item.watchlist.id %}" class="font-semibold text-base-content hover:text-primary">&ldquo;{{ item.watchlist.name }}&rdquo;</a>

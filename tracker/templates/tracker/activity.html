@@ -17,7 +17,7 @@
     always resets page too (dropping ?page along with ?member would be
     surprising otherwise), so it's a plain "?" rather than base_query-built.
   {% endcomment %}
-  <nav class="tabs-line mb-8" aria-label="Members">
+  <nav class="tabs-line mb-6 max-w-[1180px]" aria-label="Members">
     <a href="?" class="tab-line {% if not selected_member_id %}is-active{% endif %}">All members <span class="text-ink-faint">{{ members|length }}</span></a>
     {% for member in members %}
       <a href="?member={{ member.pk }}" class="tab-line flex items-center gap-1.5 {% if selected_member_id == member.pk %}is-active{% endif %}">
@@ -27,15 +27,15 @@
     {% endfor %}
   </nav>
 
-  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-x-12 gap-y-10 items-start">
-    <div id="activity-feed" class="min-w-0 max-w-3xl">
+  <div class="max-w-[1180px] grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_330px] gap-x-12 xl:gap-x-16 gap-y-12 items-start">
+    <div id="activity-feed" class="min-w-0">
       {% if not feed_groups %}
         <div class="empty"><div class="empty-title">Nothing yet</div>Quiet so far — watch something to get this started.</div>
       {% else %}
         {% for group in feed_groups %}
-          <div class="flex items-baseline justify-between pb-2 border-b border-line {% if not forloop.first %}mt-9{% endif %}">
-            <h2 class="text-[15px] font-semibold">{{ group.label|capfirst }}</h2>
-            <span class="text-xs text-ink-faint">{{ group.date|date:"l, M j" }}</span>
+          <div class="sticky top-14 lg:top-15 z-10 bg-base-100 flex items-baseline justify-between pt-3 pb-2 {% if not forloop.first %}mt-8{% endif %}">
+            <h2 class="text-[17px] font-semibold">{{ group.label|capfirst }}</h2>
+            <span class="text-[13px] text-ink-dim">{{ group.date|date:"l, M j" }}</span>
           </div>
           <div class="rows">
             {% for item in group.items %}
@@ -45,8 +45,8 @@
         {% endfor %}
 
         {% if page_obj.paginator.num_pages > 1 %}
-          <div class="flex justify-between items-center flex-wrap gap-3 mt-8 pt-4 border-t border-line">
-            <span class="text-xs text-ink-faint">Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }} household events</span>
+          <div class="flex justify-between items-center flex-wrap gap-3 mt-12">
+            <span class="text-[13px] text-ink-dim">Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }} household events</span>
             <div class="flex gap-1.5">
               {% if page_obj.has_previous %}
                 <a href="?{{ base_query }}&page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-ghost text-ink-dim">&larr; Previous</a>
@@ -67,7 +67,7 @@
       {% endif %}
     </div>
 
-    <aside class="flex flex-col gap-10 min-w-0">
+    <aside class="flex flex-col gap-11 min-w-0 lg:sticky lg:top-[5.5rem]" aria-label="Household rankings">
       {% include "tracker/partials/household_leaderboard.html" %}
       {% include "tracker/partials/household_top_titles.html" %}
     </aside>

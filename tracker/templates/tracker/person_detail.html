@@ -28,7 +28,7 @@
             <p class="text-[14.5px] leading-relaxed text-[#c4c7d2] text-left {% if person.biography|length > 400 %}line-clamp-4{% endif %}"
                {% if person.biography|length > 400 %}:class="expanded ? '' : 'line-clamp-4'"{% endif %}>{{ person.biography }}</p>
             {% if person.biography|length > 400 %}
-              <button type="button" @click="expanded = !expanded" class="mt-1.5 text-[11.5px] font-semibold text-ink-faint hover:text-primary transition-colors cursor-pointer">
+              <button type="button" @click="expanded = !expanded" class="mt-1.5 text-[12.5px] font-semibold text-ink-faint hover:text-primary transition-colors cursor-pointer">
                 <span x-show="!expanded">Read more</span>
                 <span x-show="expanded" x-cloak>Show less</span>
               </button>
@@ -44,7 +44,7 @@
           <div class="flex items-baseline gap-1.5">
             <span class="text-xl font-bold tabular-nums">{{ stat.value }}</span>
             <span class="text-ink-dim text-xs">{{ stat.label }}</span>
-            {% if stat.info %}<span tabindex="0" aria-label="{{ stat.info }}" data-tooltip="{{ stat.info }}" class="text-ink-faint text-[11px] cursor-help spool-tooltip">&#9432;</span>{% endif %}
+            {% if stat.info %}<span tabindex="0" aria-label="{{ stat.info }}" data-tooltip="{{ stat.info }}" class="text-ink-faint text-[12px] cursor-help spool-tooltip">&#9432;</span>{% endif %}
           </div>
         {% endfor %}
       </div>

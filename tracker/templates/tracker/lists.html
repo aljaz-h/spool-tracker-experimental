@@ -22,29 +22,32 @@
     <p class="text-ink-faint text-sm">Your account isn't linked to a household profile yet.</p>
   {% else %}
     {% if all_tags %}
-      <div class="flex flex-wrap gap-1.5 mb-7">
+      <div class="flex flex-wrap gap-1 mb-8">
         <a
           href="{% url 'lists' %}"
-          class="px-3 h-7 inline-flex items-center rounded-full text-xs font-medium {% if not selected_tag %}bg-primary/15 text-primary{% else %}bg-base-200 text-ink-dim hover:text-base-content{% endif %}"
+          class="px-3.5 h-8 inline-flex items-center rounded-full text-[13px] font-medium {% if not selected_tag %}bg-base-300 text-base-content{% else %}text-ink-dim hover:text-base-content hover:bg-base-200{% endif %}"
         >All</a>
         {% for tag in all_tags %}
           <a
             href="?tag={{ tag|urlencode }}"
-            class="px-3 h-7 inline-flex items-center rounded-full text-xs font-medium {% if tag == selected_tag %}bg-primary/15 text-primary{% else %}bg-base-200 text-ink-dim hover:text-base-content{% endif %}"
+            class="px-3.5 h-8 inline-flex items-center rounded-full text-[13px] font-medium {% if tag == selected_tag %}bg-base-300 text-base-content{% else %}text-ink-dim hover:text-base-content hover:bg-base-200{% endif %}"
           >{{ tag }}</a>
         {% endfor %}
       </div>
     {% endif %}
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-x-6 gap-y-8">
-      {% for wl in watchlists %}
-        {% include "tracker/partials/list_card.html" with wl=wl show_featured_toggle=profile.is_owner %}
-      {% endfor %}
-      <button
-        type="button"
-        @click="showCreate = true"
-        class="flex flex-col items-center justify-center gap-1.5 h-36 rounded-xl border border-dashed border-line text-ink-faint text-sm font-medium hover:border-primary/60 hover:text-primary"
-      >{% icon "list-checks" "w-5 h-5" %}Create list</button>
-    </div>
+    {% if watchlists %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 xl:gap-x-8 gap-y-10">
+        {% for wl in watchlists %}
+          {% include "tracker/partials/list_card.html" with wl=wl show_featured_toggle=profile.is_owner %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty py-20">
+        <div class="empty-title">No lists yet</div>
+        Collect titles into lists — a watchlist, comfort rewatches, something to share with the household.
+        <div class="mt-5"><button type="button" @click="showCreate = true" class="btn btn-primary btn-sm">+ New list</button></div>
+      </div>
+    {% endif %}
   {% endif %}
 
   <div x-show="showCreate" x-cloak class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-6" @click.self="showCreate = false" @keydown.escape.window="showCreate = false">

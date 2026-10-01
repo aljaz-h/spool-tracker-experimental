@@ -53,8 +53,8 @@
   --color-line: #262930;
   --color-line-strong: #30333c;
   --color-ink: #eceef2;
-  --color-ink-dim: #9b9fae;
-  --color-ink-faint: #646979;
+  --color-ink-dim: #a6aab8;
+  --color-ink-faint: #737887;
 
   --color-marquee: #e8a63c;
   --color-marquee-dim: #8a641f;
@@ -80,6 +80,16 @@
      pills/avatars (rounded-full). Remapping the named steps here (rather
      than find-and-replacing every template) keeps old and new markup on
      the same scale. */
+  /* text-xs carries most metadata - 12.5px rather than Tailwind's 12px so
+     tiny text is the exception, not the default. */
+  --text-xs: 0.78125rem;
+  --text-xs--line-height: 1.45;
+
+  /* Application grid - every page aligns to these. */
+  --spacing-sidebar: 13.5rem; /* 216px */
+  --spacing-sidebar-rail: 4.25rem;
+  --spacing-topbar: 3.75rem; /* 60px */
+
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
@@ -122,13 +132,30 @@
    -------------------------------------------------------------------------- */
 @layer components {
   /* Page shell */
+  /* One content column for every page: 16px gutters on phones, 24 on
+     tablets, 40 on desktop, capped at 1480px of content. */
   .page {
     width: 100%;
-    max-width: 2040px;
+    max-width: calc(1480px + 5rem);
     margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 640px) {
+    .page {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .page {
+      padding-inline: 2.5rem;
+    }
   }
   .page-narrow {
     max-width: 960px;
+  }
+  /* Reading-width pages (Settings, History, Notifications) */
+  .page-reading {
+    max-width: 1120px;
   }
   .page-head {
     display: flex;
@@ -136,42 +163,47 @@
     align-items: flex-end;
     justify-content: space-between;
     gap: 0.75rem 1.5rem;
-    margin-bottom: 1.75rem;
+    margin-bottom: 2rem;
   }
   .page-title {
     font-family: var(--font-display);
     font-size: 1.75rem;
-    line-height: 1.15;
+    line-height: 1.12;
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--color-base-content);
   }
   @media (min-width: 1024px) {
     .page-title {
-      font-size: 2rem;
+      font-size: 2.0625rem;
     }
   }
   .page-subtitle {
-    margin-top: 0.375rem;
-    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-size: 0.9375rem;
     color: var(--color-ink-dim);
   }
 
   /* Sections - content sits on the page; a heading and spacing do the
      grouping, not a box. */
   .section + .section {
-    margin-top: 2.5rem;
+    margin-top: 2.75rem;
+  }
+  @media (min-width: 1024px) {
+    .section + .section {
+      margin-top: 3.5rem;
+    }
   }
   .section-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 0.875rem;
+    margin-bottom: 1rem;
   }
   .section-title {
     font-family: var(--font-display);
-    font-size: 1.125rem;
+    font-size: 1.1875rem;
     line-height: 1.3;
     font-weight: 650;
     letter-spacing: -0.01em;
@@ -179,7 +211,7 @@
   }
   @media (min-width: 1024px) {
     .section-title {
-      font-size: 1.25rem;
+      font-size: 1.3125rem;
     }
   }
   .section-count {
@@ -189,7 +221,7 @@
   }
   .section-link {
     flex: none;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--color-ink-dim);
     white-space: nowrap;
@@ -198,7 +230,7 @@
     color: var(--color-primary);
   }
   .subhead {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--color-ink-dim);
   }
@@ -219,27 +251,40 @@
 
   /* Metadata line: "2024 · Movie · 2h 14m" - plain text with dot
      separators instead of a row of pills. */
+  /* Every item carries its own leading dot in a fixed 0.9rem slot; the
+     line is shifted left by one slot and clip-path trims that slot away,
+     so the dot that starts each wrapped line (and the very first one) is
+     never visible - no stray "·" at a line start however it wraps or
+     whichever items are hidden at a breakpoint. */
   .meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    column-gap: 0.4rem;
+    column-gap: 0;
     row-gap: 0.125rem;
+    margin-left: -0.9rem;
+    clip-path: inset(-0.5em -0.5em -0.5em 0.9rem);
     font-size: 0.8125rem;
     color: var(--color-ink-dim);
     min-width: 0;
   }
   .meta-sm {
-    font-size: 0.75rem;
+    font-size: 0.78125rem;
   }
-  .meta > * + *::before,
+  .meta > *::before {
+    content: "·";
+    display: inline-block;
+    width: 0.9rem;
+    text-align: center;
+    color: var(--color-ink-faint);
+  }
   .meta-sep::before {
     content: "·";
     margin-right: 0.4rem;
     color: var(--color-ink-faint);
   }
   .meta > .meta-nosep::before {
-    content: none;
+    content: "";
   }
 
   /* Small, quiet label chip - reserved for state that benefits from
@@ -357,13 +402,8 @@
   }
   @media (min-width: 1280px) {
     .media-grid {
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    }
-  }
-  @media (min-width: 1700px) {
-    .media-grid {
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 2.25rem 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+      gap: 2.5rem 1.5rem;
     }
   }
   .media-grid-sm {
@@ -391,8 +431,11 @@
   }
 
   /* Rows: compact list items separated by hairlines. */
-  .rows > * + * {
-    border-top: 1px solid var(--color-line);
+  /* Rows group by spacing; a hover wash marks the row, not a hairline. */
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
   }
 
   /* Segmented control (type/category switches). */
@@ -510,7 +553,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    height: 2.25rem;
+    height: 2.5rem;
     padding: 0 0.75rem;
     border-radius: var(--radius-lg);
     background: var(--color-base-200);
@@ -524,7 +567,7 @@
     min-width: 0;
     flex: 1;
     background: transparent;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     color: var(--color-base-content);
     outline: none;
   }
@@ -585,15 +628,15 @@
   }
   @media (min-width: 1024px) {
     .app-content {
-      padding-left: 15rem;
+      padding-left: var(--spacing-sidebar);
     }
     html[data-nav="collapsed"] .app-content {
-      padding-left: 4.25rem;
+      padding-left: var(--spacing-sidebar-rail);
     }
   }
   .nav-group-label {
-    margin: 1.125rem 0.75rem 0.375rem;
-    font-size: 0.6875rem;
+    margin: 1.375rem 0.75rem 0.375rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--color-ink-faint);
   }
@@ -617,7 +660,7 @@
 /* Collapsed desktop sidebar - unlayered on purpose, so these beat the
    utility classes (w-60, flex, px-3) on the same elements. */
 html[data-nav="collapsed"] .app-sidebar {
-  width: 4.25rem;
+  width: var(--spacing-sidebar-rail);
 }
 html[data-nav="collapsed"] .app-sidebar .nav-label,
 html[data-nav="collapsed"] .app-sidebar .nav-footer,
@@ -661,7 +704,7 @@ html[data-nav="collapsed"] .nav-collapse-btn {
   }
   .media-card .media-title {
     display: block;
-    margin-top: 0.5rem;
+    margin-top: 0.625rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -671,8 +714,8 @@ html[data-nav="collapsed"] .nav-collapse-btn {
     color: #fff;
   }
   .media-card .meta {
-    margin-top: 0.1875rem;
-    font-size: 0.78125rem;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
     flex-wrap: nowrap;
     overflow: hidden;
     white-space: nowrap;
@@ -763,13 +806,21 @@ html[data-nav="collapsed"] .nav-collapse-btn {
   }
   @media (min-width: 1280px) {
     .media-row {
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+      column-gap: 1.25rem;
     }
   }
-  @media (min-width: 1700px) {
-    .media-row {
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      column-gap: 1.5rem;
+  /* Row inside a narrower column (title page main column, side rails):
+     smaller poster minimum so 4-6 fit instead of three oversized ones. */
+  @media (min-width: 640px) {
+    .media-row.media-row-sm {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      column-gap: 1rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .media-row.media-row-sm {
+      grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
     }
   }
   .landscape-row {
@@ -781,6 +832,7 @@ html[data-nav="collapsed"] .nav-collapse-btn {
     scrollbar-width: none;
     margin-inline: -1rem;
     padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
     scroll-snap-type: x mandatory;
   }
   .landscape-row > * {
