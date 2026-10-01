@@ -11,11 +11,11 @@ x-app-env: &app-env
   DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?e.g. spool.example.com}
   DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:?e.g. https://spool.example.com}
   DEBUG: "False"
-  DATABASE_URL: postgres://spool:${DB_PASSWORD:?set a database password}@db:5432/spool
-  REDIS_URL: redis://redis:6379/0
-  CELERY_BROKER_URL: redis://redis:6379/0
-  CELERY_RESULT_BACKEND: redis://redis:6379/0
-  CACHE_URL: redis://redis:6379/2
+  DATABASE_URL: postgres://spool:${DB_PASSWORD:?set a database password}@${WEB_CONTAINER_NAME:-spool-web}-db:5432/spool
+  REDIS_URL: redis://${WEB_CONTAINER_NAME:-spool-web}-redis:6379/0
+  CELERY_BROKER_URL: redis://${WEB_CONTAINER_NAME:-spool-web}-redis:6379/0
+  CELERY_RESULT_BACKEND: redis://${WEB_CONTAINER_NAME:-spool-web}-redis:6379/0
+  CACHE_URL: redis://${WEB_CONTAINER_NAME:-spool-web}-redis:6379/2
   TIME_ZONE: ${TIME_ZONE:-UTC}
   # Coolify's proxy terminates TLS, so these are safe to default on.
   SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-True}
@@ -35,6 +35,12 @@ services:
       POSTGRES_DB: spool
       POSTGRES_USER: spool
       POSTGRES_PASSWORD: ${DB_PASSWORD:?set a database password}
+    # Unique hostname: `web` also sits on the shared coolify network, where a
+    # bare `db` could resolve to another stack's database.
+    networks:
+      default:
+        aliases:
+          - ${WEB_CONTAINER_NAME:-spool-web}-db
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -46,6 +52,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - ${WEB_CONTAINER_NAME:-spool-web}-redis
     volumes:
       - redis_data:/data
     healthcheck:
