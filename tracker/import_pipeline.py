@@ -40,6 +40,7 @@ that dispatches a scan by session.source.
 """
 
 import os
+import time
 
 from django.utils import timezone
 
@@ -52,6 +53,9 @@ from .models import Episode, ImportCandidate, ImportSession, MediaType, Title, W
 # polling status bar has something to show mid-run instead of sitting at
 # 0 until the whole file is done.
 PROGRESS_UPDATE_INTERVAL = 200
+# Matching can stall on network lookups (TMDB), so progress is also
+# saved at least this often while matching, not only every N items.
+PROGRESS_UPDATE_SECONDS = 2.0
 COMMIT_CHUNK_SIZE = 200
 
 FILE_SOURCES = (ImportSession.Source.CSV, ImportSession.Source.JSON, ImportSession.Source.ZIP)
@@ -172,7 +176,19 @@ def scan_normalized_items(session, normalized):
 
     match_cache = {}
     prepared = []  # [(item, TitleMatch|None, error|None), ...]
-    for item in normalized:
+    # Progress is reported from this matching loop - the slow part, one
+    # title lookup (possibly a TMDB call) per unique title - rather than
+    # from the candidate-building loop below, which is pure in-memory
+    # work. Reporting only from the latter left the review page stuck on
+    # "0 of N processed" for the whole (often minutes-long) match phase
+    # of a large import, which reads as a hung scan.
+    last_progress_save = time.monotonic()
+    for i, item in enumerate(normalized, start=1):
+        now = time.monotonic()
+        if i % PROGRESS_UPDATE_INTERVAL == 0 or now - last_progress_save >= PROGRESS_UPDATE_SECONDS:
+            session.processed_items = i - 1
+            session.save(update_fields=["processed_items"])
+            last_progress_save = now
         error = item["error"]
         if not error and item["media_type"] != MediaType.MOVIE and (item["season"] is None or item["episode"] is None):
             error = "TV/anime rows need a season and episode number"
@@ -204,12 +220,9 @@ def scan_normalized_items(session, normalized):
         ).values_list("title_id", "episode_id", "watched_at"):
             existing_events.add((title_id, episode_id, watched_at))
 
-    candidates = []
-    for i, (item, match, error) in enumerate(prepared, start=1):
-        candidates.append(_build_candidate(item, match, error, episode_lookup, existing_events))
-        if i % PROGRESS_UPDATE_INTERVAL == 0:
-            session.processed_items = i
-            session.save(update_fields=["processed_items"])
+    candidates = [
+        _build_candidate(item, match, error, episode_lookup, existing_events) for item, match, error in prepared
+    ]
 
     ImportCandidate.objects.bulk_create(
         [ImportCandidate(import_session=session, **fields) for fields in candidates], batch_size=500
