@@ -16,6 +16,7 @@ x-app-env: &app-env
   CELERY_BROKER_URL: redis://${WEB_CONTAINER_NAME:-spool-web}-redis:6379/0
   CELERY_RESULT_BACKEND: redis://${WEB_CONTAINER_NAME:-spool-web}-redis:6379/0
   CACHE_URL: redis://${WEB_CONTAINER_NAME:-spool-web}-redis:6379/2
+  CELERY_WORKER_CONCURRENCY: ${CELERY_WORKER_CONCURRENCY:-4}
   TIME_ZONE: ${TIME_ZONE:-UTC}
   # Coolify's proxy terminates TLS, so these are safe to default on.
   SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-True}
@@ -38,7 +39,7 @@ services:
     # Unique hostname: `web` also sits on the shared coolify network, where a
     # bare `db` could resolve to another stack's database.
     networks:
-      default:
+      internal:
         aliases:
           - ${WEB_CONTAINER_NAME:-spool-web}-db
     volumes:
@@ -53,7 +54,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     networks:
-      default:
+      internal:
         aliases:
           - ${WEB_CONTAINER_NAME:-spool-web}-redis
     volumes:
@@ -87,7 +88,7 @@ services:
     expose:
       - "8000"
     networks:
-      - default
+      - internal
       - coolify
     volumes:
       - media_data:/app/media
@@ -115,9 +116,12 @@ services:
       web:
         condition: service_healthy
     environment: *app-env
+    networks:
+      - internal
     volumes:
       - media_data:/app/media
-    command: celery -A spool worker -l info --concurrency=$${CELERY_WORKER_CONCURRENCY:-4}
+    command: >
+      sh -c "exec celery -A spool worker -l info --concurrency=$${CELERY_WORKER_CONCURRENCY:-4}"
 
   scheduler:
     build: .
@@ -126,6 +130,8 @@ services:
       web:
         condition: service_healthy
     environment: *app-env
+    networks:
+      - internal
     command: >
       sh -c "python manage.py bootstrap_periodic_tasks &&
              exec celery -A spool beat -l info"
@@ -136,6 +142,7 @@ volumes:
   media_data:
 
 networks:
+  internal: {}
   # Pre-existing network NPM can also see. Change `name` if your Coolify
   # destination network isn't called "coolify".
   coolify:
