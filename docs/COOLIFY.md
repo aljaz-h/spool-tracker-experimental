@@ -3,7 +3,7 @@
 Uses `docker-compose.coolify.yml`: for setups where Coolify runs the
 containers but **your own Nginx Proxy Manager** (not Coolify's Traefik)
 handles the domain and TLS. `web` joins the external `coolify` Docker
-network (which NPM can also reach) as `spool-web`; no host ports are
+network (which NPM can also reach) under the network alias `spool-web` (or `WEB_CONTAINER_NAME`); no host ports are
 published. Config comes from Coolify's environment variables, not a `.env`.
 
 1. **New Resource -> Docker Compose**, pick this repository/branch, and set

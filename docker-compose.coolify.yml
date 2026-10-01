@@ -67,10 +67,6 @@ services:
 
   web:
     build: .
-    # Fixed name = stable hostname for NPM's "Forward Hostname". Set
-    # WEB_CONTAINER_NAME=spool-web-dev on a second (dev) deployment so the
-    # two stacks don't collide on the shared coolify network.
-    container_name: ${WEB_CONTAINER_NAME:-spool-web}
     restart: unless-stopped
     depends_on:
       db:
@@ -87,9 +83,15 @@ services:
     # No host port: NPM reaches the container over the shared coolify network.
     expose:
       - "8000"
+    # Coolify ignores container_name, so NPM's "Forward Hostname" is a network
+    # alias on the shared coolify network instead. Set
+    # WEB_CONTAINER_NAME=spool-web-dev on a second (dev) deployment so the
+    # aliases of two stacks don't collide.
     networks:
-      - internal
-      - coolify
+      internal: {}
+      coolify:
+        aliases:
+          - ${WEB_CONTAINER_NAME:-spool-web}
     volumes:
       - media_data:/app/media
     command: >
