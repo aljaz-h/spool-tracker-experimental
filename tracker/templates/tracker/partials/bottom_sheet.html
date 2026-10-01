@@ -5,7 +5,7 @@
   x-cloak
   @click="bottomSheetOpen = false"
   x-transition.opacity
-  class="xl:hidden fixed inset-0 bg-black/60 z-40"
+  class="lg:hidden fixed inset-0 bg-black/60 z-40"
 ></div>
 
 <div
@@ -23,7 +23,7 @@
   role="dialog"
   aria-modal="true"
   aria-label="More"
-  class="xl:hidden fixed inset-x-0 bottom-0 z-50 bg-base-200 border border-line rounded-t-[22px] shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom))]"
+  class="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-base-200 rounded-t-2xl shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom))]"
   x-data="{ dragY: 0, dragging: false, startY: 0 }"
   @touchstart="dragging = true; dragY = 0; startY = $event.touches[0].clientY"
   @touchmove.prevent="if (dragging) { dragY = Math.max(0, $event.touches[0].clientY - startY); $el.style.transform = `translateY(${dragY}px)` }"
@@ -54,11 +54,11 @@
     active drag).
   {% endcomment %}
   <div class="flex justify-center pt-2.5 pb-1">
-    <div class="w-9 h-1 rounded-full bg-base-300"></div>
+    <div class="w-9 h-1 rounded-full bg-line-strong"></div>
   </div>
 
   <div class="flex items-center justify-between px-5 pb-3">
-    <h2 class="font-display text-lg tracking-wide">More</h2>
+    <h2 class="text-base font-semibold">More</h2>
     <button
       type="button"
       @click="bottomSheetOpen = false"
@@ -70,51 +70,26 @@
   </div>
 
   {% comment %}
-    Reading order (this is a 3-col grid, auto-placed by DOM order) is
-    History/Profile/Stats, then Lists/Activity/Settings underneath -
-    requested layout, not the original History/Lists/Activity on top of
-    Profile/Settings/Stats.
+    Everything the four bottom-nav tabs don't cover, as plain rows -
+    History, Lists, Stats, Activity, Profile, Settings.
   {% endcomment %}
-  <div class="grid grid-cols-3 gap-3 px-5 pb-6">
+  <nav class="px-3 pb-4 flex flex-col" aria-label="More">
     {% url 'history' as history_url %}
-    <a href="{{ history_url }}" @click="bottomSheetOpen = false" class="flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-base-300 text-ink-dim hover:text-base-content text-xs font-semibold transition-colors">
-      {% icon "history" "w-5 h-5" %}
-      History
-    </a>
-
-    {% url 'my_profile' as profile_url %}
-    <a href="{{ profile_url }}" @click="bottomSheetOpen = false" class="flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-base-300 text-ink-dim hover:text-base-content text-xs font-semibold transition-colors">
-      {% icon "user" "w-5 h-5" %}
-      Profile
-    </a>
-
-    {% url 'stats' as stats_url %}
-    <a href="{{ stats_url }}" @click="bottomSheetOpen = false" class="flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-base-300 text-ink-dim hover:text-base-content text-xs font-semibold transition-colors">
-      {% icon "bar-chart-3" "w-5 h-5" %}
-      Stats
-    </a>
-
+    <a href="{{ history_url }}" @click="bottomSheetOpen = false" class="sheet-row">{% icon "history" "w-5 h-5 text-ink-dim" %}History</a>
     {% url 'lists' as lists_url %}
-    <a href="{{ lists_url }}" @click="bottomSheetOpen = false" class="flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-base-300 text-ink-dim hover:text-base-content text-xs font-semibold transition-colors">
-      {% icon "list-checks" "w-5 h-5" %}
-      Lists
-    </a>
-
+    <a href="{{ lists_url }}" @click="bottomSheetOpen = false" class="sheet-row">{% icon "list-checks" "w-5 h-5 text-ink-dim" %}Lists</a>
+    {% url 'stats' as stats_url %}
+    <a href="{{ stats_url }}" @click="bottomSheetOpen = false" class="sheet-row">{% icon "bar-chart-3" "w-5 h-5 text-ink-dim" %}Stats</a>
     {% if show_activity_nav %}
       {% url 'activity' as activity_url %}
-      <a href="{{ activity_url }}" @click="bottomSheetOpen = false" class="flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-base-300 text-ink-dim hover:text-base-content text-xs font-semibold transition-colors">
-        {% icon "users" "w-5 h-5" %}
-        Activity
-      </a>
+      <a href="{{ activity_url }}" @click="bottomSheetOpen = false" class="sheet-row">{% icon "users" "w-5 h-5 text-ink-dim" %}Activity</a>
     {% endif %}
-
+    <div class="my-1.5 mx-3 h-px bg-line"></div>
+    {% url 'my_profile' as profile_url %}
+    <a href="{{ profile_url }}" @click="bottomSheetOpen = false" class="sheet-row">{% icon "user" "w-5 h-5 text-ink-dim" %}Profile</a>
     {% url 'settings' as settings_url %}
-    <a href="{{ settings_url }}" @click="bottomSheetOpen = false" class="flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-base-300 text-ink-dim hover:text-base-content text-xs font-semibold transition-colors">
-      {% icon "settings" "w-5 h-5" %}
-      Settings
-    </a>
-  </div>
-
+    <a href="{{ settings_url }}" @click="bottomSheetOpen = false" class="sheet-row">{% icon "settings" "w-5 h-5 text-ink-dim" %}Settings</a>
+  </nav>
   {% if other_profiles %}
     {% comment %}
       Same list/action topbar.html's own Friends dropdown renders
@@ -148,15 +123,15 @@
       end (unclear why, but real and reproducible); pinning position at
       the grid level sidesteps whatever that interaction was entirely.
     {% endcomment %}
-    <div class="px-5 pb-6" x-data="{ expanded: false }">
-      <div class="bg-base-300 rounded-2xl overflow-hidden">
+    <div class="px-5 pb-4" x-data="{ expanded: false }">
+      <div class="bg-base-300 rounded-xl overflow-hidden">
         <button
           type="button"
           @click="expanded = !expanded"
           :aria-expanded="expanded.toString()"
           class="w-full grid grid-cols-[1fr_auto_1fr] items-center text-ink-dim hover:text-base-content px-4 py-3 transition-colors"
         >
-          <span class="text-[11px] font-semibold uppercase tracking-wide justify-self-start">Friends</span>
+          <span class="text-xs font-semibold justify-self-start">Friends</span>
           <span class="text-xs font-semibold justify-self-center">{{ other_profiles|length }} Friend{{ other_profiles|length|pluralize }}</span>
           <span class="justify-self-end transition-transform" :class="expanded ? 'rotate-180' : ''">
             {% icon "chevron-down" "w-4 h-4" %}
@@ -180,7 +155,7 @@
               >{% if not p.avatar_image %}{{ p.display_name|first|upper }}{% endif %}</div>
               <div class="min-w-0 flex-1">
                 <div class="text-sm font-medium truncate">{{ p.display_name }}</div>
-                <div class="text-[10.5px] text-ink-faint font-mono">{% if p.last_seen_at %}Active {{ p.last_seen_at|timesince }} ago{% else %}No activity yet{% endif %}</div>
+                <div class="text-[11px] text-ink-faint">{% if p.last_seen_at %}Active {{ p.last_seen_at|timesince }} ago{% else %}No activity yet{% endif %}</div>
               </div>
             </button>
           {% endfor %}

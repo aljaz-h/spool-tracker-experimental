@@ -254,3 +254,50 @@ def badge_color_classes(color):
     Details panel's own copy of it), which used to mean the same if/elif
     chain duplicated verbatim in both."""
     return _BADGE_COLOR_CLASSES.get(color, _DEFAULT_BADGE_COLOR_CLASSES)
+
+
+_MEDIA_LABELS = {"movie": "Movie", "tv": "TV", "anime": "Anime"}
+_MEDIA_DOT_CLASSES = {"movie": "bg-movie", "tv": "bg-tv", "anime": "bg-anime"}
+
+
+@register.filter
+def media_label(media_type):
+    """"movie"/"tv"/"anime" -> the human label used in metadata lines
+    ("Movie · 2024"), in place of the old upper-cased type pills."""
+    return _MEDIA_LABELS.get(media_type, (media_type or "").title())
+
+
+@register.filter
+def media_dot_class(media_type):
+    """Background class for the small media-type dot (Movie amber / TV
+    violet / Anime teal) that accompanies media_label in meta lines."""
+    return _MEDIA_DOT_CLASSES.get(media_type, "bg-ink-faint")
+
+
+@register.filter
+def runtime_hm(minutes):
+    """148 -> "2h 28m", 45 -> "45m" - a movie runtime in the hero's meta
+    line. Passes anything non-numeric (None, "") straight through."""
+    try:
+        minutes = int(minutes)
+    except (TypeError, ValueError):
+        return minutes
+    hours, mins = divmod(minutes, 60)
+    if not hours:
+        return f"{mins}m"
+    return f"{hours}h {mins}m" if mins else f"{hours}h"
+
+
+_CHIP_COLOR_CLASSES = {
+    "success": "chip-success",
+    "error": "chip-error",
+    "info": "chip-info",
+    "warning": "chip-primary",
+}
+
+
+@register.filter
+def chip_color_class(color):
+    """tmdb.STATUS_BADGES' semantic color name -> the matching .chip
+    modifier (app.css), for the status chip in title_detail's hero."""
+    return _CHIP_COLOR_CLASSES.get(color, "")

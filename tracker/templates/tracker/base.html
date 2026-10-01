@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16.png' %}">
   <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
   <link rel="manifest" href="{% static 'img/manifest.webmanifest' %}">
-  <meta name="theme-color" content="#14161c">
+  <meta name="theme-color" content="#0e1014">
   {% comment %}
     iOS Safari doesn't act on the web manifest for "Add to Home Screen" -
     these are its own separate, older meta-tag convention for the same
@@ -20,6 +20,30 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Spool">
+  <script>
+    // Restore the desktop sidebar's collapsed/expanded state before first
+    // paint (sidebar.html) - a data attribute on <html>, read by app.css,
+    // so the content column never visibly jumps once the page loads.
+    try { if (localStorage.getItem('spool-nav-collapsed') === '1') document.documentElement.dataset.nav = 'collapsed'; } catch (e) {}
+    window.toggleNavCollapsed = () => {
+      const root = document.documentElement;
+      const collapsed = root.dataset.nav !== 'collapsed';
+      if (collapsed) root.dataset.nav = 'collapsed'; else delete root.dataset.nav;
+      try { localStorage.setItem('spool-nav-collapsed', collapsed ? '1' : '0'); } catch (e) {}
+    };
+    // "/" jumps to the global search field from anywhere that isn't
+    // already a text input - the usual media-app shortcut.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      const input = document.getElementById('global-search-input');
+      if (!input || !input.offsetParent) return;
+      e.preventDefault();
+      input.focus();
+      input.select();
+    });
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Public+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'dist/app.css' %}">
@@ -54,12 +78,16 @@
     // not something anyone pressed, and flashing the bar every few
     // seconds on those pages would be pure noise.
     (() => {
-      const bar = document.getElementById('spool-progress-bar');
+      // Looked up lazily - this script runs in <head>, before the bar
+      // element exists, so a top-level getElementById here is null.
+      const getBar = () => document.getElementById('spool-progress-bar');
       let activeRequests = 0;
       let trickleTimer = null;
       let hideTimer = null;
 
       const trickle = () => {
+        const bar = getBar();
+        if (!bar) return;
         const current = parseFloat(bar.style.width) || 0;
         if (current >= 90) return;
         bar.style.width = Math.min(90, current + (90 - current) * 0.2 + 4) + '%';
@@ -67,6 +95,8 @@
       };
 
       const start = () => {
+        const bar = getBar();
+        if (!bar) return;
         clearTimeout(hideTimer);
         clearTimeout(trickleTimer);
         bar.style.transition = 'none';
@@ -80,6 +110,8 @@
       };
 
       const finish = () => {
+        const bar = getBar();
+        if (!bar) return;
         clearTimeout(trickleTimer);
         bar.style.width = '100%';
         hideTimer = setTimeout(() => {
@@ -403,9 +435,9 @@
     x-effect="document.body.classList.toggle('overflow-hidden', bottomSheetOpen)"
   >
     {% include "tracker/partials/sidebar.html" %}
-    <div class="min-h-screen flex flex-col">
+    <div class="app-content">
       {% include "tracker/partials/topbar.html" %}
-      <main class="p-4 sm:p-6 lg:p-8 pb-28 xl:pb-16 lg:px-[calc(2rem+10%)]">
+      <main id="main" class="page flex-1 px-4 sm:px-6 lg:px-8 xl:px-10 pt-5 sm:pt-7 lg:pt-8 pb-28 lg:pb-16">
         {% include "tracker/partials/discover_type_switcher.html" %}
         {% block content %}{% endblock %}
       </main>
@@ -415,14 +447,14 @@
   </div>
 
   <dialog id="confirm_modal" class="modal" aria-labelledby="confirm-modal-message">
-    <div class="modal-box bg-base-200 border border-line rounded-2xl p-5 max-w-sm">
+    <div class="modal-box bg-base-200 rounded-2xl p-5 max-w-sm">
       <div id="confirm-modal-message" class="text-sm leading-relaxed mb-5"></div>
       <div class="flex gap-2.5 justify-end">
         <form method="dialog"><button type="submit" class="btn btn-sm btn-soft">Cancel</button></form>
         <button type="button" id="confirm-modal-confirm-btn" class="btn btn-sm btn-error">Confirm</button>
       </div>
     </div>
-    <form method="dialog" class="modal-backdrop bg-black/60 backdrop-blur-sm"><button>close</button></form>
+    <form method="dialog" class="modal-backdrop bg-black/70"><button>close</button></form>
   </dialog>
 
   {% include "tracker/partials/toasts.html" %}

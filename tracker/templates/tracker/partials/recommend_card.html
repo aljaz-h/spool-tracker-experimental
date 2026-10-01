@@ -7,9 +7,9 @@
     would eventually push every card below it further down the sidebar
     every time someone new gets added.
   {% endcomment %}
-  <div class="bg-base-200 border border-line rounded-2xl p-4" x-data="{ expanded: false }">
+  <section id="recommend-card" x-data="{ expanded: false }">
     <div class="flex items-center justify-between mb-2.5">
-      <h2 class="font-display text-lg">Recommend to</h2>
+      <h2 class="subhead">Recommend to</h2>
       <label class="flex items-center gap-1.5 text-[11px] text-ink-dim cursor-pointer select-none spool-tooltip" data-tooltip="Recipient sees just a mystery card until they open it">
         <input type="checkbox" id="recommend-blind-toggle" name="is_blind" class="checkbox checkbox-xs">
         Send as mystery &#127873;
@@ -21,7 +21,7 @@
           {% if op.avatar_image %}
             <div class="w-8 h-8 rounded-full flex-none bg-cover bg-center" style="background-image:url('{{ op.avatar_image.url }}')"></div>
           {% else %}
-            <div class="w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-semibold flex-none" style="background:{{ op.avatar_color }};color:#fff;">{{ op.display_name|first|upper }}</div>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-none" style="background:{{ op.avatar_color }};color:#fff;">{{ op.display_name|first|upper }}</div>
           {% endif %}
           <div class="flex-1 min-w-0 text-[13px] font-medium truncate">{{ op.display_name }}</div>
           {% if op.id in already_watched_profile_ids %}
@@ -60,7 +60,7 @@
             {% endcomment %}
             <form
               hx-post="{% if is_preview %}{% url 'title_preview_send_recommendation' preview_media_type preview_tmdb_id %}{% else %}{% url 'send_recommendation' title.pk %}{% endif %}"
-              hx-target="closest div.bg-base-200" hx-swap="outerHTML"
+              hx-target="#recommend-card" hx-swap="outerHTML"
               hx-include="#recommend-blind-toggle"
               class="flex-none"
             >
@@ -69,7 +69,7 @@
               <button
                 type="submit"
                 title="Recommend to {{ op.display_name }}"
-                class="w-7 h-7 rounded-full flex items-center justify-center border border-line text-ink-dim hover:border-primary hover:text-primary transition-colors"
+                class="w-7 h-7 rounded-md flex items-center justify-center text-ink-dim hover:bg-base-300 hover:text-primary"
               >{% icon "send" "w-3.5 h-3.5" %}</button>
             </form>
           {% endif %}
@@ -86,5 +86,5 @@
         <span x-show="expanded" x-cloak>Show less</span>
       </button>
     {% endif %}
-  </div>
+  </section>
 {% endif %}

@@ -4,129 +4,89 @@
 {% block content %}
 
   {% comment %}
-    Full-bleed hero - negative horizontal margins so this section runs
-    edge-to-edge against the actual viewport instead of sitting inside a
-    card. The inner content wrapper below re-applies <main>'s own padding
-    (base.html) so the poster/title still line up with Description/Cast
-    underneath it, which stayed in <main>'s normal padded flow.
+    Cinematic hero: the TMDB backdrop bleeds to the edges of <main> (the
+    negative margins cancel base.html's own <main> padding, which is
+    plain rem at every breakpoint) behind a restrained scrim; poster and
+    the essentials - title, one metadata line, ratings, a short overview
+    and the main actions - sit over its lower edge so everything that
+    matters is above the fold. The hero has no fixed height: it grows
+    with its content, with a minimum so short titles still get room for
+    the artwork.
 
-    The lg: figure is NOT a typo of <main>'s own lg:px-[calc(2rem+10%)] -
-    percentage margins/padding resolve against the width of the
-    element's own containing block, and this div's containing block is
-    <main>'s content box (already narrowed by that same padding), not
-    the wider box <main>'s padding percentage itself resolves against.
-    Naively reusing calc(2rem+10%) here undershoots by a bit that grows
-    with viewport width, since 10% of the *narrower* content box is
-    less than 10% of the box <main> based its own padding on - visible
-    live as a growing gap on wide monitors. calc(2.5rem+12.5%) is the
-    value that, once you carry that narrowing through, lands back on
-    exactly the same absolute inset as <main>'s own padding for every
-    width (solved algebraically, verified against a live render at
-    1280/1920/2560px).
-
-    The -mt values cancel <main>'s own top padding (p-4/sm:p-6/lg:p-8) -
-    same idea as the horizontal cancellation above, but these are plain
-    rem values rather than percentages, so a direct 1:1 negative margin
-    is exact at every width (no containing-block math needed).
+    Every watched/list popover below is position:fixed and placed via
+    window.positionPopover, so the hero's overflow-hidden backdrop layer
+    (a sibling, not an ancestor, of the content) never clips them.
   {% endcomment %}
-  <div class="relative overflow-hidden -mx-4 sm:-mx-6 lg:-mx-[calc(2.5rem+12.5%)] -mt-4 sm:-mt-6 lg:-mt-8 mb-8 min-h-[280px] h-auto sm:h-[380px] md:h-[440px] lg:h-[500px] {% if not details.backdrop_url %}{{ poster_seed|gradient_class }}{% endif %}"
-       {% if details.backdrop_url %}style="background-image:url('{{ details.backdrop_url }}');background-size:cover;background-position:center 20%"{% endif %}>
-    <div class="hero-backdrop-scrim"></div>
+  <section class="relative -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 -mt-5 sm:-mt-7 lg:-mt-8 mb-10" aria-label="{{ display_name }}">
+    <div class="absolute inset-x-0 top-0 h-[300px] sm:h-[400px] lg:h-[460px] overflow-hidden {% if not details.backdrop_url %}{{ poster_seed|gradient_class }} opacity-40{% endif %}" aria-hidden="true">
+      {% if details.backdrop_url %}
+        <img src="{{ details.backdrop_url }}" alt="" class="absolute inset-0 w-full h-full object-cover object-[center_20%] opacity-60">
+      {% endif %}
+      <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,16,20,0.92)_0%,rgba(14,16,20,0.55)_45%,rgba(14,16,20,0.2)_100%)]"></div>
+      <div class="absolute inset-0 bg-[linear-gradient(0deg,#0e1014_0%,rgba(14,16,20,0.75)_30%,rgba(14,16,20,0)_70%)]"></div>
+    </div>
 
-    {% if director %}
-      <div class="absolute z-10 bottom-4 right-4 sm:right-6 lg:right-[calc(2rem+10%)] text-right font-mono text-[11px] text-ink-dim hidden sm:block">
-        <div>Directed by <span class="text-base-content font-semibold">{{ director.name }}</span></div>
-      </div>
-    {% endif %}
-
-    {% comment %}
-      Below sm:, the poster sits above the title instead of beside it
-      (flex-col, items-start) - side-by-side at the full desktop sizes
-      (130px poster + text-4xl heading) left almost no width for the
-      text column on a phone, wrapping the title across several lines
-      inside this block's fixed height and clipping it. Stacking, plus
-      smaller poster/text sizes, keeps everything on-screen without
-      needing to know the title's length ahead of time.
-    {% endcomment %}
-    <div class="relative z-10 h-full flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-5 p-4 sm:p-6 lg:p-8 lg:px-[calc(2rem+10%)] items-start sm:items-end">
-      <div class="w-[92px] sm:w-[130px] flex-none">
-        <div class="aspect-[2/3] rounded-lg overflow-hidden border border-white/10 bg-cover bg-center {% if not display_poster_url %}{{ poster_seed|gradient_class }}{% endif %}"
-             {% if display_poster_url %}style="background-image:url('{{ display_poster_url|poster_size:"w185" }}')"{% endif %}>
-        </div>
-        {% comment %}
-          TV/anime only - details.number_of_seasons is always None for a
-          movie (see tmdb._normalize_result/get_full_details), so this
-          naturally never renders there, no separate media_type check
-          needed. Same figure this page's own header row already shows
-          next to the title (release_info/runtime/season-count line
-          below) - duplicated here, under the poster itself, since
-          that's specifically where it was asked for; not worth
-          removing from the header line over it; a real difference here
-          it's next to the poster art rather than mixed into the meta
-          row further right, which is what mattered for the ask.
-        {% endcomment %}
-        {% if details.number_of_seasons %}
-          <div class="mt-1.5 text-center font-mono text-[10px] text-ink-dim leading-tight">{{ details.number_of_seasons }} season{{ details.number_of_seasons|pluralize }}<br>({{ details.number_of_episodes }} EP)</div>
-        {% endif %}
-      </div>
-      <div class="min-w-0 flex-1">
-        <h1 class="font-display text-2xl sm:text-4xl">{{ display_name }}
-          <span class="text-ink-dim text-base sm:text-2xl font-body align-middle">{{ display_year }}</span>
-          {% if status_badge %}
-            <span class="align-middle font-mono text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-full border {{ status_badge.color|badge_color_classes }}">{{ status_badge.label }}</span>
+    <div class="relative px-4 sm:px-6 lg:px-8 xl:px-10 pt-24 sm:pt-40 lg:pt-48 flex flex-col sm:flex-row gap-5 sm:gap-8 items-start sm:items-end">
+      <div class="w-[112px] sm:w-[170px] lg:w-[210px] flex-none">
+        <div class="poster shadow-[0_18px_48px_rgba(0,0,0,0.6)] {% if not display_poster_url %}{{ poster_seed|gradient_class }}{% endif %}">
+          {% if display_poster_url %}
+            <img src="{{ display_poster_url|poster_size:"w342" }}" alt="{{ display_name }} poster" class="absolute inset-0">
           {% endif %}
+        </div>
+      </div>
+
+      <div class="min-w-0 flex-1 pb-1">
+        <h1 class="text-[1.75rem] sm:text-4xl lg:text-[2.75rem] font-bold leading-[1.08] tracking-[-0.02em] text-white">
+          {{ display_name }}
         </h1>
         {% if mal_title_japanese %}
-          {# MyAnimeList's native title (views._anime_jikan_context) - anime only, sits right under the English/romanized one same as most anime trackers show it. #}
-          <div class="text-ink-faint text-sm mt-0.5">{{ mal_title_japanese }}</div>
+          {# MyAnimeList's native title (views._anime_jikan_context) - anime only. #}
+          <div class="text-ink-dim text-sm mt-1">{{ mal_title_japanese }}</div>
         {% endif %}
-        {% if details.certification or details.original_language or details.genres %}
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-dim mt-2 font-mono">
-            {% if details.certification %}<span class="px-1.5 py-0.5 rounded border border-line bg-base-300/60 text-[10.5px] uppercase tracking-wide">{{ details.certification }}</span>{% endif %}
-            {% if details.original_language %}<span class="px-1.5 py-0.5 rounded border border-line bg-base-300/60 text-[10.5px] uppercase tracking-wide">{{ details.original_language }}</span>{% endif %}
-            {% for genre in details.genres %}
-              <span class="px-2.5 py-0.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[10.5px] font-semibold">{{ genre }}</span>
-            {% endfor %}
-          </div>
-        {% endif %}
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-dim mt-2 font-mono">
-          {% if release_info %}
-            <span>{% if release_info.prefix %}<span class="font-semibold text-base-content">{{ release_info.prefix }}</span> {% endif %}{{ release_info.date }}</span>
-          {% endif %}
-          {% if release_info and details.runtime %}<span class="font-bold">·</span>{% elif release_info and details.number_of_seasons %}<span class="font-bold">·</span>{% endif %}
-          {% if details.runtime %}<span class="font-semibold text-base-content">{{ details.runtime }} min</span>{% endif %}
-          {% if details.number_of_seasons %}<span class="font-semibold text-base-content">{{ details.number_of_seasons }} season{{ details.number_of_seasons|pluralize }} ({{ details.number_of_episodes }} EP)</span>{% endif %}
+
+        <div class="meta mt-3 text-[13.5px] text-[#c4c7d2]">
+          {% if display_year %}<span>{{ display_year }}</span>{% endif %}
+          {% if details.certification %}<span><span class="px-1 py-px rounded border border-white/25 text-[11px] font-semibold">{{ details.certification }}</span></span>{% endif %}
+          {% if details.runtime %}<span>{{ details.runtime|runtime_hm }}</span>{% endif %}
+          {% if details.number_of_seasons %}<span>{{ details.number_of_seasons }} season{{ details.number_of_seasons|pluralize }} ({{ details.number_of_episodes }} EP)</span>{% endif %}
+          {% if details.genres %}<span>{{ details.genres|join:", " }}</span>{% endif %}
+          {% if status_badge %}<span><span class="chip {{ status_badge.color|chip_color_class }}">{{ status_badge.label }}</span></span>{% endif %}
+        </div>
+        <div class="meta mt-1.5 text-[12.5px]">
+          {% if release_info %}<span>{% if release_info.prefix %}{{ release_info.prefix }} {% endif %}{{ release_info.date }}</span>{% endif %}
+          {% if director %}<span>Directed by <span class="text-base-content font-medium">{{ director.name }}</span></span>{% endif %}
           {% if mal_studios %}<span>{{ mal_studios|join:", " }}</span>{% endif %}
           {% if mal_source %}<span>Source: {{ mal_source }}</span>{% endif %}
+          {% if details.original_language and not details.original_language_display %}<span class="uppercase">{{ details.original_language }}</span>{% endif %}
         </div>
-        {% if details.tagline %}<div class="text-ink-dim italic text-sm mt-3 hidden sm:block">{{ details.tagline }}</div>{% endif %}
+
+        {% if not is_preview %}
+          <div class="mt-4">{% include "tracker/partials/title_rating_pills.html" %}</div>
+        {% elif tmdb_pill or mdblist_ratings %}
+          <div class="mt-4">{% include "tracker/partials/pill_badges.html" with tmdb_pill=tmdb_pill mdblist_ratings=mdblist_ratings %}</div>
+        {% endif %}
+
+        {% if details.tagline or details.overview %}
+          <div class="max-w-3xl mt-4" x-data="{ more: false }">
+            {% if details.tagline %}<p class="text-[13.5px] italic text-ink-dim mb-1.5">{{ details.tagline }}</p>{% endif %}
+            {% if details.overview %}
+              <p class="text-[14.5px] leading-relaxed text-[#cfd2db]" :class="more ? '' : 'line-clamp-3'">{{ details.overview }}</p>
+              {% if details.overview|length > 260 %}
+                <button type="button" @click="more = !more" class="mt-1 text-[12.5px] font-medium text-ink-dim hover:text-primary" x-text="more ? 'Show less' : 'Read more'">Read more</button>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endif %}
 
         {% comment %}
-          Movies are a single item - "watched" is a single fact, so the
-          header uses the same one-click/popover control the poster
-          card's own checkmark uses. A show isn't singular the same way
-          (many seasons, many episodes), so its own header control
-          (title_tv_watched_button.html) has no single toggle either -
-          every action inside its popover is a season- or whole-show-
-          scoped bulk one, the exact same ones the episode browser's own
-          "Mark episodes" popover further down already exposes
-          (title_episodes.html) - this is a second entry point onto
-          those, not a separate feature, kept in sync via an OOB swap
-          (views._hero_watched_button_oob) regardless of which of the
-          two triggered the change. A not-yet-tracked TV/anime preview
-          gets a third flavor below - not this rewatch-capable popover
-          (nothing to rewatch yet), but the same "mark all seasons"/
-          "mark this season" bulk actions the Episodes section further
-          down already exposes for a preview, just surfaced here too so
-          marking one watched doesn't require scrolling past Cast/
-          Description to find them. "Watch trailer" lives in this same
-          row regardless of media type (it's the one hero action every
-          kind of title can have). Every branch below always has
-          *something* to show now (a watched button of some shape,
-          always), so this row no longer needs an outer condition to
-          avoid rendering an empty wrapper.
+          Main actions. Movies get the single watched control; shows get
+          title_tv_watched_button.html (season/whole-show bulk actions,
+          kept in sync with the episode browser's own copy via
+          views._hero_watched_button_oob); not-yet-tracked previews get
+          the materialize-on-click versions. Then lists, rating and the
+          trailer.
         {% endcomment %}
-          <div class="flex flex-wrap items-center gap-3 mt-4 p-3 rounded-xl bg-base-100/50 border border-line/70 w-fit">
+        <div class="flex flex-wrap items-center gap-2 mt-5">
             {% if is_preview and preview_media_type == "movie" %}
               {% comment %}
                 Not-yet-tracked, so this is a plain (non-HTMX) form - a
@@ -145,11 +105,11 @@
                 <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="true" class="btn btn-primary btn-sm">+ Mark as Watched</button>
                 <div
                   x-show="open" x-cloak x-transition @click.outside="open = false"
-                  class="absolute z-50 top-full mt-1.5 left-0 w-72 bg-base-200 border border-line rounded-xl p-2 shadow-xl"
+                  class="absolute z-50 top-full mt-1.5 left-0 w-72 menu-surface p-2"
                 >
                   <form method="post" action="{% url 'title_preview_mark_watched' preview_media_type preview_tmdb_id %}">
                     {% csrf_token %}
-                    <div class="flex items-start justify-between px-2 pt-1 pb-2 mb-1 border-b border-line">
+                    <div class="flex items-start justify-between px-2 pt-1 pb-2 mb-1">
                       <div class="font-semibold text-sm">Mark as watched</div>
                       <button type="button" @click="open = false" title="Close" class="text-ink-faint hover:text-base-content leading-none p-0.5">&times;</button>
                     </div>
@@ -244,9 +204,9 @@
                 <div
                   x-ref="panel"
                   x-show="open" x-cloak x-transition @click.outside="open = false"
-                  class="fixed z-50 w-72 bg-base-200 border border-line rounded-xl p-2 shadow-xl"
+                  class="fixed z-50 w-72 menu-surface p-2"
                 >
-                  <div class="flex items-start justify-between px-2 pt-1 pb-2 mb-1 border-b border-line">
+                  <div class="flex items-start justify-between px-2 pt-1 pb-2 mb-1">
                     <div class="font-semibold text-sm">Mark as watched</div>
                     <button type="button" @click="open = false" title="Close" class="text-ink-faint hover:text-base-content leading-none p-0.5">&times;</button>
                   </div>
@@ -256,7 +216,7 @@
                     hx-confirm="Mark every episode of every season of “{{ details.name }}” as watched? This can take a moment for shows with many seasons."
                     class="flex items-start gap-2.5 px-2 py-2 rounded-lg hover:bg-base-300 text-left w-full"
                   >
-                    <span class="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "check" "w-4 h-4" %}</span>
+                    <span class="w-7 h-7 rounded-md bg-base-300 flex items-center justify-center flex-none text-ink-dim">{% icon "check" "w-4 h-4" %}</span>
                     <span class="min-w-0">
                       <span class="block text-[13px] font-semibold">Mark all seasons watched</span>
                       <span class="block text-[11px] text-ink-faint">Every episode, every season</span>
@@ -287,19 +247,23 @@
             {% else %}
               {% include "tracker/partials/title_tv_watched_button.html" with title=title watch_count=watch_count show_completed=show_completed season_cards=season_cards %}
             {% endif %}
+            {% if not is_preview %}
+              {% include "tracker/partials/title_detail_list_popover.html" with title=title my_lists=my_lists in_list_ids=in_list_ids %}
+              <a href="#your-rating" class="btn btn-sm btn-soft gap-1.5">{% if latest_rating %}<span class="text-primary">&#9733;</span> {{ latest_rating }}/10{% else %}<span class="text-ink-dim">&#9733;</span> Rate{% endif %}</a>
+            {% endif %}
             {% if trailer %}
               <button
                 type="button"
                 onclick="openTrailerModal('trailer-modal-{{ poster_seed }}')"
-                class="btn btn-sm btn-outline gap-1.5"
+                class="btn btn-sm btn-ghost gap-1.5"
               >
                 {% icon "play" "w-3.5 h-3.5" %} Watch trailer
               </button>
             {% endif %}
-          </div>
         </div>
       </div>
     </div>
+  </section>
 
   {% if trailer %}
     {% comment %}
@@ -313,7 +277,7 @@
       is never fetched until the dialog actually opens.
     {% endcomment %}
     <dialog id="trailer-modal-{{ poster_seed }}" class="modal">
-      <div class="modal-box max-w-3xl bg-base-200 border border-line p-2">
+      <div class="modal-box max-w-4xl bg-base-200 p-2">
         <form method="dialog"><button class="btn btn-xs btn-circle btn-ghost absolute right-1.5 top-1.5 z-10 bg-base-300/90">✕</button></form>
         <div class="aspect-video rounded-lg overflow-hidden bg-black">
           <iframe
@@ -327,19 +291,14 @@
           ></iframe>
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop bg-black/60 backdrop-blur-sm"><button>close</button></form>
+      <form method="dialog" class="modal-backdrop bg-black/80"><button>close</button></form>
     </dialog>
   {% endif %}
 
-  <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 mb-8">
-    <div class="min-w-0">
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px] gap-x-12 gap-y-10 mb-8">
+    <div class="min-w-0 flex flex-col gap-11">
 
-      {% include "tracker/partials/title_rating_pills.html" %}
-
-      {% if details.overview %}
-        <h2 class="font-display text-xl mb-3">Description</h2>
-        <p class="max-w-3xl text-[14px] leading-relaxed text-ink-dim mb-6">{{ details.overview }}</p>
-      {% endif %}
+      {% include "tracker/partials/title_episodes.html" %}
 
       {% if gallery_items %}
         {% comment %}
@@ -351,11 +310,10 @@
           <dialog> above directly, never the lightbox.
         {% endcomment %}
         {{ gallery_image_urls|json_script:"gallery-image-urls" }}
-        <h2 class="font-display text-xl mb-3 flex items-center gap-2">
-          {% icon "clapperboard" "w-4 h-4 text-ink-faint" %} Media
-        </h2>
+        <section>
+        <div class="section-head"><h2 class="section-title">Media</h2></div>
         <div
-          class="relative mb-8"
+          class="relative"
           x-data="{
             showAll: false,
             images: JSON.parse(document.getElementById('gallery-image-urls').textContent),
@@ -381,12 +339,12 @@
                 {% else %}
                   @click="openLightbox({{ item.index }})"
                 {% endif %}
-                class="relative w-40 sm:w-52 aspect-video flex-none rounded-lg overflow-hidden bg-base-300 border border-line group"
+                class="relative w-44 sm:w-60 aspect-video flex-none rounded-lg overflow-hidden bg-base-300 group"
               >
-                <img src="{{ item.thumbnail_url }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
+                <img src="{{ item.thumbnail_url }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover group-hover:brightness-110">
                 {% if item.kind == "trailer" %}
                   <span class="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/50 transition-colors">
-                    <span class="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-black">
+                    <span class="w-11 h-11 rounded-full bg-black/70 ring-1 ring-white/30 flex items-center justify-center text-white">
                       {% icon "play" "w-4 h-4 ml-0.5" %}
                     </span>
                   </span>
@@ -398,7 +356,7 @@
                 type="button"
                 x-show="!showAll"
                 @click="showAll = true"
-                class="w-40 sm:w-52 aspect-video flex-none rounded-lg bg-base-300 border border-line flex items-center justify-center font-mono text-sm text-ink-dim hover:text-base-content hover:bg-base-300/70 transition-colors"
+                class="w-44 sm:w-60 aspect-video flex-none rounded-lg bg-base-200 flex items-center justify-center text-sm font-medium text-ink-dim hover:text-base-content hover:bg-base-300"
               >+{{ gallery_items|length|add:"-5" }}</button>
             {% endif %}
           </div>
@@ -410,7 +368,7 @@
             for a half-second the next time this same dialog opens.
           {% endcomment %}
           <dialog x-ref="lightbox" class="modal" @close="$refs.lightboxImg.src = ''">
-            <div class="modal-box max-w-4xl bg-base-200 border border-line p-2">
+            <div class="modal-box max-w-5xl bg-base-200 p-2">
               <form method="dialog"><button class="btn btn-xs btn-circle btn-ghost absolute right-1.5 top-1.5 z-10 bg-base-300/90">✕</button></form>
               <img x-ref="lightboxImg" src="" alt="" class="w-full h-auto rounded-lg">
               {% if gallery_image_urls|length > 1 %}
@@ -418,50 +376,54 @@
                 <button type="button" @click="step(1)" aria-label="Next image" class="btn btn-sm btn-circle absolute right-2 top-1/2 -translate-y-1/2 bg-base-300/90">{% icon "chevron-right" "w-4 h-4" %}</button>
               {% endif %}
             </div>
-            <form method="dialog" class="modal-backdrop bg-black/60 backdrop-blur-sm"><button>close</button></form>
+            <form method="dialog" class="modal-backdrop bg-black/80"><button>close</button></form>
           </dialog>
         </div>
+        </section>
       {% endif %}
 
       {% if director or cast %}
-        <h2 class="font-display text-xl mb-3">Cast</h2>
-        <div class="flex gap-4 overflow-x-auto scroll-row pb-2 mb-8">
+        <section>
+        <div class="section-head"><h2 class="section-title">Cast &amp; Crew</h2></div>
+        <div class="flex gap-4 overflow-x-auto scroll-row pb-2">
           {% if director %}
-            {% if director.tmdb_person_id %}<a href="{% url 'person_detail' director.tmdb_person_id %}" class="w-[104px] flex-none">{% else %}<div class="w-[104px] flex-none">{% endif %}
-              <div class="aspect-square rounded-full relative overflow-hidden bg-base-300 border border-line">
+            {% if director.tmdb_person_id %}<a href="{% url 'person_detail' director.tmdb_person_id %}" class="w-[96px] flex-none group">{% else %}<div class="w-[96px] flex-none group">{% endif %}
+              <div class="aspect-square rounded-full relative overflow-hidden bg-base-300">
                 {% if director.profile_url %}
                   <img src="{{ director.profile_url }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
                 {% endif %}
               </div>
-              <div class="text-[11.5px] font-semibold mt-1.5 text-center leading-tight line-clamp-2">{{ director.name }}</div>
-              <div class="text-[10.5px] text-ink-faint text-center leading-tight line-clamp-2 mt-0.5">Director</div>
+              <div class="text-[12.5px] font-medium mt-2 text-center leading-tight line-clamp-2 group-hover:text-white">{{ director.name }}</div>
+              <div class="text-[11.5px] text-ink-faint text-center leading-tight line-clamp-2 mt-0.5">Director</div>
             {% if director.tmdb_person_id %}</a>{% else %}</div>{% endif %}
-            <div class="w-px flex-none bg-line my-1.5"></div>
+            <div class="w-px flex-none bg-line my-3"></div>
           {% endif %}
           {% for actor in cast %}
-            {% if actor.tmdb_person_id %}<a href="{% url 'person_detail' actor.tmdb_person_id %}" class="w-[104px] flex-none">{% else %}<div class="w-[104px] flex-none">{% endif %}
-              <div class="aspect-square rounded-full relative overflow-hidden bg-base-300 border border-line">
+            {% if actor.tmdb_person_id %}<a href="{% url 'person_detail' actor.tmdb_person_id %}" class="w-[96px] flex-none group">{% else %}<div class="w-[96px] flex-none group">{% endif %}
+              <div class="aspect-square rounded-full relative overflow-hidden bg-base-300">
                 {% if actor.profile_url %}
                   <img src="{{ actor.profile_url }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
                 {% endif %}
               </div>
-              <div class="text-[11.5px] font-semibold mt-1.5 text-center leading-tight line-clamp-2">{{ actor.name }}</div>
-              <div class="text-[10.5px] text-ink-faint text-center leading-tight line-clamp-2 mt-0.5">{{ actor.character }}</div>
+              <div class="text-[12.5px] font-medium mt-2 text-center leading-tight line-clamp-2 group-hover:text-white">{{ actor.name }}</div>
+              <div class="text-[11.5px] text-ink-faint text-center leading-tight line-clamp-2 mt-0.5">{{ actor.character }}</div>
             {% if actor.tmdb_person_id %}</a>{% else %}</div>{% endif %}
           {% endfor %}
         </div>
+        </section>
       {% endif %}
 
       {% comment %}
-        Sits between Cast and Episodes (rather than after Episodes) so
+        Sits after Cast (rather than after Episodes) so
         it reads right after Cast for movies too - title_episodes.html
         renders nothing for a movie (no seasons), so this is the same
         physical position either way, just written once instead of
         branching on media_type.
       {% endcomment %}
       {% if status_badge or details.original_language_display or details.digital_release_date or details.budget or details.revenue or details.production_companies or details.countries_display %}
-        <h2 class="font-display text-xl mb-3">Details</h2>
-        <div class="bg-base-200 border border-line rounded-2xl p-4 mb-8">
+        <section>
+        <div class="section-head"><h2 class="section-title">Details</h2></div>
+        <div>
           {% comment %}
             Language/country each link back to Discover, pre-filtered to
             everything else in that same language/from that same country
@@ -482,172 +444,150 @@
             about it, via the shared badge_color_classes filter.
           {% endcomment %}
           {% firstof preview_media_type title.media_type as details_media_type %}
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+          <dl class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-4">
             {% if status_badge %}
               <div>
-                <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-0.5">Status</div>
-                <span class="inline-block font-mono text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-full border {{ status_badge.color|badge_color_classes }}">{{ status_badge.label }}</span>
+                <div class="text-xs text-ink-faint mb-0.5">Status</div>
+                <span class="text-[13.5px] font-medium">{{ status_badge.label }}</span>
               </div>
             {% endif %}
             {% if details.original_language_display %}
               <div>
-                <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-0.5">Original language</div>
-                <a href="{% url details_media_type|discover_url_name 'popular' %}?language={{ details.original_language_display.code }}" class="text-[13px] font-bold hover:underline">
+                <div class="text-xs text-ink-faint mb-0.5">Original language</div>
+                <a href="{% url details_media_type|discover_url_name 'popular' %}?language={{ details.original_language_display.code }}" class="text-[13.5px] font-medium text-base-content hover:text-primary">
                   {% if details.original_language_display.flag %}{{ details.original_language_display.flag }} {% endif %}{{ details.original_language_display.name }}
                 </a>
               </div>
             {% endif %}
             {% if details.digital_release_date %}
               <div>
-                <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-0.5">Digital release</div>
-                <div class="text-[13px] font-medium">{{ details.digital_release_date|date:"M j, Y" }}{% if details.digital_release_upcoming %} <span class="text-ink-faint">(upcoming)</span>{% endif %}</div>
+                <div class="text-xs text-ink-faint mb-0.5">Digital release</div>
+                <div class="text-[13.5px]">{{ details.digital_release_date|date:"M j, Y" }}{% if details.digital_release_upcoming %} <span class="text-ink-faint">(upcoming)</span>{% endif %}</div>
               </div>
             {% endif %}
             {% if details.budget %}
               <div>
-                <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-0.5">Budget</div>
-                <div class="text-[13px] font-medium">{{ details.budget|format_money }}</div>
+                <div class="text-xs text-ink-faint mb-0.5">Budget</div>
+                <div class="text-[13.5px]">{{ details.budget|format_money }}</div>
               </div>
             {% endif %}
             {% if details.revenue %}
               <div>
-                <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-0.5">Revenue</div>
-                <div class="text-[13px] font-medium">{{ details.revenue|format_money }}</div>
+                <div class="text-xs text-ink-faint mb-0.5">Revenue</div>
+                <div class="text-[13.5px]">{{ details.revenue|format_money }}</div>
               </div>
             {% endif %}
             {% if details.production_companies %}
               <div>
-                <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-0.5">Production companies</div>
-                <div class="text-[13px] font-medium">{{ details.production_companies|join:", " }}</div>
+                <div class="text-xs text-ink-faint mb-0.5">Production companies</div>
+                <div class="text-[13.5px]">{{ details.production_companies|join:", " }}</div>
               </div>
             {% endif %}
             {% if details.countries_display %}
               <div>
-                <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-0.5">Country</div>
-                <div class="text-[13px] flex flex-wrap gap-x-1.5">
+                <div class="text-xs text-ink-faint mb-0.5">Country</div>
+                <div class="text-[13.5px] flex flex-wrap gap-x-1.5">
                   {% for country in details.countries_display %}
-                    <a href="{% url details_media_type|discover_url_name 'popular' %}?origin_country={{ country.code }}" class="font-bold hover:underline">{% if country.flag %}{{ country.flag }} {% endif %}{{ country.name }}</a>{% if not forloop.last %}<span class="text-ink-faint">,</span>{% endif %}
+                    <a href="{% url details_media_type|discover_url_name 'popular' %}?origin_country={{ country.code }}" class="font-medium hover:text-primary">{% if country.flag %}{{ country.flag }} {% endif %}{{ country.name }}</a>{% if not forloop.last %}<span class="text-ink-faint">,</span>{% endif %}
                   {% endfor %}
                 </div>
               </div>
             {% endif %}
-          </div>
+          </dl>
         </div>
+        </section>
       {% endif %}
 
-      {% include "tracker/partials/title_episodes.html" %}
-
       {% if collection_parts %}
-        <h2 class="font-display text-xl mb-3">Collection</h2>
-        <div class="flex gap-3 overflow-x-auto scroll-row pb-2 mb-2">
+        <section>
+        <div class="section-head"><h2 class="section-title">Collection</h2></div>
+        <div class="media-row">
           {% for item in collection_parts %}
-            <div class="w-[130px] sm:w-[168px] flex-none">
-              {% include "tracker/partials/discover_tile.html" with item=item %}
-            </div>
+            {% include "tracker/partials/discover_tile.html" with item=item %}
           {% endfor %}
         </div>
+        </section>
       {% endif %}
 
       {% if similar %}
-        <h2 class="font-display text-xl mb-3">If you like this, check out</h2>
-        <div class="flex gap-3 overflow-x-auto scroll-row pb-2 mb-2">
+        <section>
+        <div class="section-head"><h2 class="section-title">If you like this, check out</h2></div>
+        <div class="media-row">
           {% for item in similar %}
-            <div class="w-[130px] sm:w-[168px] flex-none">
-              {% include "tracker/partials/discover_tile.html" with item=item %}
-            </div>
+            {% include "tracker/partials/discover_tile.html" with item=item %}
           {% endfor %}
         </div>
+        </section>
       {% endif %}
 
     </div>
 
-    <div class="flex flex-col gap-5">
+    <aside class="flex flex-col gap-8 min-w-0">
       {% if not is_preview %}
-        <div class="bg-base-200 border border-line rounded-2xl p-4">
-          <div class="text-[10px] text-ink-faint uppercase tracking-wide mb-1.5">Your rating</div>
-          <form method="post" action="{% url 'title_rate' title.pk %}" class="flex items-center flex-wrap gap-1 sm:gap-1.5">
+        <section id="your-rating" class="scroll-mt-20">
+          <h2 class="subhead mb-2">Your rating</h2>
+          <form method="post" action="{% url 'title_rate' title.pk %}" class="flex items-center flex-wrap gap-1">
             {% csrf_token %}
             {% for star in star_fill %}
               <div class="relative w-6 h-6 sm:w-7 sm:h-7 spool-tooltip" data-tooltip="Rate {{ star.right }}/10">
-                <span class="absolute inset-0 text-2xl sm:text-3xl leading-none text-ink-faint select-none">&#9733;</span>
+                <span class="absolute inset-0 text-2xl sm:text-[28px] leading-none text-base-300 select-none">&#9733;</span>
                 {% if star.fill %}
-                  <span class="absolute inset-0 text-2xl sm:text-3xl leading-none text-primary select-none overflow-hidden pointer-events-none" style="width:{{ star.fill }}%">&#9733;</span>
+                  <span class="absolute inset-0 text-2xl sm:text-[28px] leading-none text-primary select-none overflow-hidden pointer-events-none" style="width:{{ star.fill }}%">&#9733;</span>
                 {% endif %}
                 <button type="submit" name="rating" value="{{ star.left }}" class="absolute inset-y-0 left-0 w-1/2 cursor-pointer" aria-label="Rate {{ star.left }} out of 10"></button>
                 <button type="submit" name="rating" value="{{ star.right }}" class="absolute inset-y-0 right-0 w-1/2 cursor-pointer" aria-label="Rate {{ star.right }} out of 10"></button>
               </div>
             {% endfor %}
-            {% if latest_rating %}<span class="font-mono text-xs text-ink-dim ml-1">{{ latest_rating }}/10</span>{% endif %}
+            {% if latest_rating %}<span class="text-sm font-semibold ml-2">{{ latest_rating }}<span class="text-ink-faint font-normal">/10</span></span>{% endif %}
           </form>
-        </div>
+        </section>
       {% endif %}
 
-      <div class="bg-base-200 border border-line rounded-2xl p-4">
-        <h2 class="font-display text-lg mb-2.5">Lists</h2>
-        {% comment %}
-          A preview title (is_preview) has no local row yet, so every
-          chip is necessarily unfilled (in_list_ids is always empty -
-          see title_preview) and posts to title_preview_add_to_list
-          instead of add_to_list/remove_from_list - clicking any chip,
-          including "Watchlist" itself, materializes the Title and adds
-          it to that one list, same as the old dedicated "+ Add to
-          Watchlist" button did for the Watchlist specifically. That
-          materialize-on-click flow doesn't fit the toggleable list-picker
-          popover every other page uses (poster_card_list_popover.html),
-          so a preview keeps its own simple chip row; once a real Title
-          row exists it gets the same popover as everywhere else.
-        {% endcomment %}
-        {% if is_preview %}
-          {% if my_lists %}
-            <div class="flex flex-wrap gap-2 mb-3">
-              {% for list in my_lists %}
-                <form method="post" action="{% url 'title_preview_add_to_list' preview_media_type preview_tmdb_id list.id %}">
-                  {% csrf_token %}
-                  <button
-                    type="submit"
-                    class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors bg-base-100 text-ink-dim border-line hover:border-primary hover:text-base-content"
-                  >{{ list.name }}</button>
-                </form>
-              {% endfor %}
-            </div>
-          {% endif %}
-          <a
-            href="{% url 'lists' %}"
-            class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-dashed border-line text-ink-faint hover:border-primary hover:text-primary transition-colors"
-          >+ New list</a>
-        {% else %}
-          <div class="flex flex-wrap items-center gap-2">
-            {% include "tracker/partials/title_detail_list_popover.html" with title=title my_lists=my_lists in_list_ids=in_list_ids %}
-            <a
-              href="{% url 'lists' %}"
-              class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-dashed border-line text-ink-faint hover:border-primary hover:text-primary transition-colors"
-            >+ New list</a>
+      {% if is_preview %}
+        <section>
+          <h2 class="subhead mb-2">Add to a list</h2>
+          {% comment %}
+            A preview title has no local row yet, so every list starts
+            unchecked and posts to title_preview_add_to_list, which
+            materializes the Title and adds it - a tracked title gets the
+            list popover in the hero instead.
+          {% endcomment %}
+          <div class="flex flex-wrap gap-2">
+            {% for list in my_lists %}
+              <form method="post" action="{% url 'title_preview_add_to_list' preview_media_type preview_tmdb_id list.id %}">
+                {% csrf_token %}
+                <button type="submit" class="h-8 px-3 rounded-lg text-[12.5px] font-medium bg-base-200 text-ink-dim hover:text-base-content hover:bg-base-300">+ {{ list.name }}</button>
+              </form>
+            {% endfor %}
+            <a href="{% url 'lists' %}" class="h-8 px-3 rounded-lg text-[12.5px] font-medium text-ink-faint hover:text-primary inline-flex items-center">New list…</a>
           </div>
-        {% endif %}
-      </div>
-
-      {% include "tracker/partials/recommend_card.html" %}
+        </section>
+      {% endif %}
 
       {% if watch_providers %}
-        <div class="bg-base-200 border border-line rounded-2xl p-4">
-          <h2 class="font-display text-lg mb-2.5">Where to Watch</h2>
-          <div class="flex flex-wrap gap-2">
+        <section>
+          <h2 class="subhead mb-2.5">Where to watch</h2>
+          <div class="flex flex-col gap-2">
             {% for p in watch_providers %}
-              <div class="flex items-center gap-1.5 bg-base-100 border border-line rounded-full pl-1 pr-3 py-1">
+              <div class="flex items-center gap-2.5">
                 {% if p.logo_url %}
-                  <div class="w-5 h-5 rounded-full bg-cover bg-center flex-none border border-line" style="background-image:url('{{ p.logo_url }}')"></div>
+                  <div class="w-7 h-7 rounded-md bg-cover bg-center flex-none" style="background-image:url('{{ p.logo_url }}')"></div>
+                {% else %}
+                  <div class="w-7 h-7 rounded-md bg-base-300 flex-none"></div>
                 {% endif %}
-                <span class="text-[11px]">{{ p.name }}</span>
+                <span class="text-[13.5px]">{{ p.name }}</span>
               </div>
             {% endfor %}
           </div>
-        </div>
+        </section>
       {% endif %}
+
+      {% include "tracker/partials/recommend_card.html" %}
 
       {% if not is_preview %}
         {% include "tracker/partials/title_history_card.html" with progress=progress recent_events=recent_events %}
       {% endif %}
-    </div>
+    </aside>
   </div>
 
 {% endblock %}

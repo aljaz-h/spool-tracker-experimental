@@ -1,30 +1,35 @@
 {% load tracker_extras icons %}
-{# context: wl, show_featured_toggle (optional, bool) - shared between lists.html's grid and dashboard_featured_lists.html's rail so both render a list's cover collage identically. #}
+{# context: wl, show_featured_toggle (optional, bool) - shared between lists.html's grid and dashboard_featured_lists.html so both render a list's cover the same way: an overlapping stack of the first few posters, then name and one meta line. #}
 <div class="relative group">
-  <a href="{% url 'list_detail' wl.id %}" class="block bg-base-200 border border-line rounded-2xl overflow-hidden hover:border-ink-faint transition-colors">
-    <div class="grid grid-cols-4 h-24 bg-base-300">
-      {% for item in wl.items.all|slice:":4" %}
-        <div class="relative overflow-hidden {% if not item.title.poster_url %}{{ item.title.pk|gradient_class }}{% endif %}">
-          {% if item.title.poster_url %}
-            <img src="{{ item.title.poster_url|poster_size:"w185" }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
-          {% endif %}
-        </div>
-      {% endfor %}
+  <a href="{% url 'list_detail' wl.id %}" class="block">
+    <div class="relative h-36 rounded-xl overflow-hidden bg-base-200 group-hover:bg-base-300 transition-colors">
+      {% with items=wl.items.all|slice:":5" %}
+        {% if items %}
+          <div class="absolute inset-0 flex items-end pl-4 pb-0 -space-x-9">
+            {% for item in items %}
+              <div class="relative w-[84px] aspect-[2/3] rounded-md overflow-hidden flex-none shadow-[0_4px_16px_rgba(0,0,0,0.55)] translate-y-6 {% if not item.title.poster_url %}{{ item.title.pk|gradient_class }}{% endif %}" style="z-index:{{ forloop.revcounter }}">
+                {% if item.title.poster_url %}
+                  <img src="{{ item.title.poster_url|poster_size:"w185" }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover">
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="absolute inset-0 flex items-center justify-center text-ink-faint">{% icon "list-checks" "w-6 h-6" %}</div>
+        {% endif %}
+      {% endwith %}
     </div>
-    <div class="p-3.5">
-      <div class="font-bold text-[14.5px] mb-0.5">{{ wl.name }}</div>
-      <div class="text-xs text-ink-dim font-mono">{{ wl.items.all|length }} title{{ wl.items.all|length|pluralize }} · {% if wl.is_shared %}shared{% else %}private{% endif %}</div>
-      {% if wl.tags %}
-        <div class="flex flex-wrap gap-1 mt-1.5">
-          {% for tag in wl.tags %}
-            <span class="px-1.5 py-0.5 rounded bg-base-300 text-[10px] text-ink-dim font-mono">{{ tag }}</span>
-          {% endfor %}
-        </div>
-      {% endif %}
+    <div class="mt-2.5 min-w-0">
+      <div class="text-[14.5px] font-semibold truncate group-hover:text-white">{{ wl.name }}</div>
+      <div class="meta meta-sm mt-0.5">
+        <span>{{ wl.items.all|length }} title{{ wl.items.all|length|pluralize }}</span>
+        <span>{% if wl.is_shared %}Shared{% else %}Private{% endif %}</span>
+        {% for tag in wl.tags %}<span class="text-ink-faint">#{{ tag }}</span>{% endfor %}
+      </div>
     </div>
   </a>
   {% if show_featured_toggle and wl.is_shared %}
-    {# Owner-only curation control (views.toggle_list_featured) - not nested inside the <a> above (invalid HTML, and would double as a navigation click) so it's an absolutely-positioned sibling instead, same non-nesting pattern list_detail_items.html uses for its remove button over poster_card.html. #}
+    {# Owner-only curation control (views.toggle_list_featured) - a positioned sibling of the <a> above, not nested inside it (invalid HTML, and would double as a navigation click). #}
     <form
       method="post" action="{% url 'toggle_list_featured' wl.id %}"
       class="absolute top-2 right-2"
@@ -34,9 +39,9 @@
       <button
         type="submit"
         aria-label="{% if wl.is_featured %}Remove from Dashboard{% else %}Feature on Dashboard{% endif %}"
-        class="w-7 h-7 rounded-full flex items-center justify-center transition-colors {% if wl.is_featured %}bg-primary text-primary-content{% else %}bg-black/70 text-white opacity-0 group-hover:opacity-100{% endif %}"
+        class="h-7 px-2 rounded-md flex items-center gap-1 text-[11px] font-semibold {% if wl.is_featured %}bg-primary text-primary-content{% else %}bg-black/70 text-white opacity-0 group-hover:opacity-100 focus:opacity-100{% endif %}"
       >
-        {% icon "sparkles" "w-3.5 h-3.5" %}
+        {% icon "sparkles" "w-3.5 h-3.5" %}{% if wl.is_featured %}Featured{% endif %}
       </button>
     </form>
   {% endif %}

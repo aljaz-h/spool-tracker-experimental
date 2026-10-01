@@ -9,18 +9,20 @@
   prefersdark: true;
   color-scheme: dark;
 
-  --color-base-100: #14161c;
-  --color-base-200: #1b1e26;
-  --color-base-300: #232732;
+  /* Surfaces - three close tonal steps, separated mostly by tone and
+     spacing rather than borders. Page < surface < raised. */
+  --color-base-100: #0e1014; /* page */
+  --color-base-200: #16181d; /* surface: cards that really are cards, inputs, menus */
+  --color-base-300: #1f2229; /* raised: hover, tracks, nested controls */
   --color-base-content: #eceef2;
 
-  --color-primary: #e8a63c; /* marquee amber */
+  --color-primary: #e8a63c; /* Spool amber - also the Movies colour */
   --color-primary-content: #1a1305;
-  --color-secondary: #3fa9a0; /* teal — anime accent */
+  --color-secondary: #3fa9a0; /* teal - Anime */
   --color-secondary-content: #0c211f;
-  --color-accent: #8b85d6; /* violet — TV split in charts */
+  --color-accent: #8b85d6; /* muted violet - TV */
   --color-accent-content: #171531;
-  --color-neutral: #1b1e26;
+  --color-neutral: #1f2229;
   --color-neutral-content: #eceef2;
   --color-info: #6fb7ce;
   --color-info-content: #0a1f26;
@@ -28,27 +30,31 @@
   --color-success-content: #07230f;
   --color-warning: #e8a63c;
   --color-warning-content: #1a1305;
-  --color-error: #fa5a3d;
+  --color-error: #f0604a;
   --color-error-content: #240a05;
 
-  --radius-selector: 8px;
+  --radius-selector: 6px;
   --radius-field: 8px;
-  --radius-box: 16px;
+  --radius-box: 12px;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
 @theme {
-  --font-display: "Bebas Neue", sans-serif;
+  /* Public Sans carries the interface, headings included. Bebas Neue is
+     kept only for the wordmark and the occasional hero figure
+     (font-brand); JetBrains Mono only for codes/times/technical figures. */
+  --font-display: "Public Sans", sans-serif;
+  --font-brand: "Bebas Neue", sans-serif;
   --font-body: "Public Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  /* Brand tokens straight from the mockup that fall outside daisyUI's
-     semantic palette — rating-source colors, dimmed pairs for gradients/
-     borders, and the mockup's r-s/r-m/r-l radius scale (r-m/r-l already
-     match --radius-field/--radius-box above; r-s has no daisyUI slot). */
-  --color-line: #2b2f3b;
+  --color-line: #262930;
+  --color-line-strong: #30333c;
   --color-ink: #eceef2;
-  --color-ink-dim: #9195a6;
-  --color-ink-faint: #5c606f;
+  --color-ink-dim: #9b9fae;
+  --color-ink-faint: #646979;
 
   --color-marquee: #e8a63c;
   --color-marquee-dim: #8a641f;
@@ -57,6 +63,11 @@
   --color-violet: #8b85d6;
   --color-violet-dim: #4b4880;
 
+  /* Media-type aliases - same three hues, named for what they mean. */
+  --color-movie: #e8a63c;
+  --color-tv: #8b85d6;
+  --color-anime: #3fa9a0;
+
   --color-imdb: #f5c518;
   --color-rt: #fa5a3d;
   --color-trakt: #ed4a50;
@@ -64,26 +75,803 @@
   --color-metacritic: #ffcc33;
   --color-tmdb: #01b4e4;
 
-  /* No custom radius tokens: Tailwind's built-in rounded-sm (4px) /
-     rounded-lg (8px) / rounded-2xl (16px) already match the mockup's
-     r-s/r-m/r-l exactly. (A same-named --radius-s/--radius-l override was
-     tried and dropped — those names collide with Tailwind's *reserved*
-     logical-corner utilities, "start corners" and "left corners", not
-     "small"/"large", producing a conflicting duplicate rule.) */
+  /* Flatter radius scale than Tailwind's defaults: posters/buttons/inputs
+     sit at 8px, cards at 10-12px, nothing rounder than 14px except true
+     pills/avatars (rounded-full). Remapping the named steps here (rather
+     than find-and-replacing every template) keeps old and new markup on
+     the same scale. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.875rem;
 }
 
 @layer base {
   body {
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1,
   h2,
   h3,
   .font-display {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: 0.02em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
+  .font-brand {
+    font-family: var(--font-brand);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-primary) 70%, transparent);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-primary) 35%, transparent);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Spool UI primitives. Templates compose these instead of re-spelling the
+   same utility strings, so the look stays consistent page to page.
+   -------------------------------------------------------------------------- */
+@layer components {
+  /* Page shell */
+  .page {
+    width: 100%;
+    max-width: 1560px;
+    margin-inline: auto;
+  }
+  .page-narrow {
+    max-width: 960px;
+  }
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-base-content);
+  }
+  @media (min-width: 1024px) {
+    .page-title {
+      font-size: 2rem;
+    }
+  }
+  .page-subtitle {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-dim);
+  }
+
+  /* Sections - content sits on the page; a heading and spacing do the
+     grouping, not a box. */
+  .section + .section {
+    margin-top: 2.5rem;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.875rem;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    line-height: 1.3;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: var(--color-base-content);
+  }
+  @media (min-width: 1024px) {
+    .section-title {
+      font-size: 1.25rem;
+    }
+  }
+  .section-count {
+    margin-left: 0.375rem;
+    font-weight: 500;
+    color: var(--color-ink-faint);
+  }
+  .section-link {
+    flex: none;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-ink-dim);
+    white-space: nowrap;
+  }
+  .section-link:hover {
+    color: var(--color-primary);
+  }
+  .subhead {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-ink-dim);
+  }
+
+  /* A real card: a surface, no border. */
+  .surface {
+    background: var(--color-base-200);
+    border-radius: var(--radius-2xl);
+  }
+  .surface-raised {
+    background: var(--color-base-300);
+    border-radius: var(--radius-xl);
+  }
+  .rule {
+    height: 1px;
+    background: var(--color-line);
+  }
+
+  /* Metadata line: "2024 · Movie · 2h 14m" - plain text with dot
+     separators instead of a row of pills. */
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 0.4rem;
+    row-gap: 0.125rem;
+    font-size: 0.8125rem;
+    color: var(--color-ink-dim);
+    min-width: 0;
+  }
+  .meta-sm {
+    font-size: 0.75rem;
+  }
+  .meta > * + *::before,
+  .meta-sep::before {
+    content: "·";
+    margin-right: 0.4rem;
+    color: var(--color-ink-faint);
+  }
+  .meta > .meta-nosep::before {
+    content: none;
+  }
+
+  /* Small, quiet label chip - reserved for state that benefits from
+     isolation (status, filler/special, sync state, active filter). */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    height: 1.25rem;
+    padding: 0 0.4rem;
+    border-radius: 5px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    background: var(--color-base-300);
+    color: var(--color-ink-dim);
+  }
+  .chip-primary {
+    background: color-mix(in oklab, var(--color-primary) 16%, transparent);
+    color: var(--color-primary);
+  }
+  .chip-success {
+    background: color-mix(in oklab, var(--color-success) 15%, transparent);
+    color: var(--color-success);
+  }
+  .chip-error {
+    background: color-mix(in oklab, var(--color-error) 15%, transparent);
+    color: var(--color-error);
+  }
+  .chip-info {
+    background: color-mix(in oklab, var(--color-info) 15%, transparent);
+    color: var(--color-info);
+  }
+  .chip-tv {
+    background: color-mix(in oklab, var(--color-tv) 18%, transparent);
+    color: var(--color-tv);
+  }
+  .chip-anime {
+    background: color-mix(in oklab, var(--color-anime) 18%, transparent);
+    color: var(--color-anime);
+  }
+  .chip-movie {
+    background: color-mix(in oklab, var(--color-movie) 16%, transparent);
+    color: var(--color-movie);
+  }
+  /* Overlay variant for chips sitting on artwork */
+  .chip-scrim {
+    background: rgba(10, 11, 14, 0.78);
+    color: #eceef2;
+  }
+
+  /* Media-type dot, used next to a meta line instead of a type badge. */
+  .type-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    flex: none;
+  }
+
+  /* Progress */
+  .progress-track {
+    height: 3px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.09);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+  }
+
+  /* Artwork */
+  .poster {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-base-300);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+  .poster img,
+  .backdrop img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .backdrop {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--color-base-300);
+  }
+  .art-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(8, 9, 12, 0.92) 0%, rgba(8, 9, 12, 0.55) 38%, rgba(8, 9, 12, 0) 70%);
+    pointer-events: none;
+  }
+
+  /* Responsive poster grid - posters dominate, cards stay light. */
+  .media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 1.25rem 0.875rem;
+  }
+  @media (min-width: 640px) {
+    .media-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1.75rem 1.125rem;
+    }
+  }
+  @media (min-width: 1536px) {
+    .media-grid {
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    }
+  }
+  .media-grid-sm {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: 1.25rem 0.75rem;
+  }
+  .landscape-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  /* Media card text under a poster */
+  .media-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-base-content);
+  }
+  .media-sub {
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    color: var(--color-ink-dim);
+  }
+
+  /* Rows: compact list items separated by hairlines. */
+  .rows > * + * {
+    border-top: 1px solid var(--color-line);
+  }
+
+  /* Segmented control (type/category switches). */
+  .seg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding: 0.1875rem;
+    border-radius: 9px;
+    background: var(--color-base-200);
+  }
+  .seg-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 1.875rem;
+    padding: 0 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-ink-dim);
+    white-space: nowrap;
+  }
+  .seg-item:hover {
+    color: var(--color-base-content);
+  }
+  .seg-item.is-active,
+  .seg-item[aria-current="page"],
+  .seg-item[aria-pressed="true"] {
+    background: var(--color-base-300);
+    color: var(--color-base-content);
+  }
+
+  /* Underline tabs - for in-page category navigation. */
+  .tabs-line {
+    display: flex;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--color-line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-line::-webkit-scrollbar {
+    display: none;
+  }
+  .tab-line {
+    position: relative;
+    padding: 0.625rem 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink-dim);
+    white-space: nowrap;
+  }
+  .tab-line:hover {
+    color: var(--color-base-content);
+  }
+  .tab-line.is-active,
+  .tab-line[aria-current="page"] {
+    color: var(--color-base-content);
+  }
+  .tab-line.is-active::after,
+  .tab-line[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-primary);
+  }
+
+  /* Settings: grouped forms separated by hairlines, not boxed cards. */
+  .settings-panel {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .settings-panel:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .settings-panel > h3:first-child,
+  .settings-panel h3 {
+    font-size: 1rem;
+    font-weight: 650;
+  }
+
+  /* Removable active-filter chip. */
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 1.75rem;
+    padding: 0 0.625rem 0 0.75rem;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--color-primary) 13%, transparent);
+    color: var(--color-base-content);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .filter-chip svg {
+    color: var(--color-ink-dim);
+  }
+  .filter-chip:hover svg {
+    color: var(--color-primary);
+  }
+
+  /* Toolbar row for filters/sort/search. */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+  .field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-base-200);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+    color: var(--color-ink-dim);
+  }
+  .field:focus-within {
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 60%, transparent);
+  }
+  .field input {
+    min-width: 0;
+    flex: 1;
+    background: transparent;
+    font-size: 0.8125rem;
+    color: var(--color-base-content);
+    outline: none;
+  }
+  .field input::placeholder {
+    color: var(--color-ink-faint);
+  }
+
+  /* Empty states: short, plain, one optional action. */
+  .empty {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--color-ink-faint);
+    font-size: 0.875rem;
+  }
+  .empty-title {
+    margin-bottom: 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-ink-dim);
+  }
+
+  /* Big figure used on Stats/Dashboard summaries. */
+  .figure {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-base-content);
+  }
+  .figure-label {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--color-ink-dim);
+  }
+
+  /* Popover/menu surface */
+  .menu-surface {
+    background: var(--color-base-200);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* App shell: desktop sidebar rail + content offset. Collapsed state is a
+   data attribute on <html> (set before first paint by base.html). */
+@layer components {
+  .app-content {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* clip (not hidden): stops stray off-canvas pseudo-elements (hidden
+       tooltips near the right edge) from adding a horizontal scrollbar,
+       without turning this into a scroll container that would break the
+       sticky top bar. */
+    overflow-x: clip;
+  }
+  @media (min-width: 1024px) {
+    .app-content {
+      padding-left: 15rem;
+    }
+    html[data-nav="collapsed"] .app-content {
+      padding-left: 4.25rem;
+    }
+  }
+  html[data-nav="collapsed"] .app-sidebar {
+    width: 4.25rem;
+  }
+  html[data-nav="collapsed"] .app-sidebar .nav-label,
+  html[data-nav="collapsed"] .app-sidebar .nav-footer,
+  html[data-nav="collapsed"] .app-sidebar .nav-wordmark {
+    display: none;
+  }
+  html[data-nav="collapsed"] .app-sidebar .nav-group-label {
+    font-size: 0;
+    height: 1px;
+    margin: 0.75rem 0.5rem;
+    padding: 0;
+    background: var(--color-line);
+  }
+  html[data-nav="collapsed"] .app-sidebar .nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+  html[data-nav="collapsed"] .nav-collapse-btn {
+    margin-inline: auto;
+    transform: rotate(180deg);
+  }
+  .nav-group-label {
+    margin: 1.125rem 0.75rem 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-ink-faint);
+  }
+  .sheet-row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    height: 3rem;
+    padding: 0 0.75rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-base-content);
+  }
+  .sheet-row:hover,
+  .sheet-row:active {
+    background: var(--color-base-300);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Media cards. One family for every poster/landscape tile in the app:
+   artwork carries the card, text sits below (portrait) or on a scrim
+   (landscape), and actions surface on hover/focus (or first tap on touch,
+   driven by base.html's .tile-hover/.tile-focus classes on .discover-tile).
+   -------------------------------------------------------------------------- */
+@layer components {
+  .media-card {
+    position: relative;
+    min-width: 0;
+  }
+  .media-card-art {
+    position: relative;
+  }
+  .media-card-art > .poster img,
+  .media-card-art > .backdrop img,
+  .media-card-art .art-fill {
+    transition: filter 200ms ease;
+  }
+  .media-card .media-title {
+    display: block;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .media-card a:hover .media-title,
+  .media-card a.media-title:hover {
+    color: #fff;
+  }
+  .media-card .meta {
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  /* Hover/focus action bar, overlaid on the bottom of the artwork. It is
+     a sibling of the overflow-hidden art box (not a child) so the
+     fixed-position popovers its buttons open are never clipped. */
+  .card-actions {
+    position: absolute;
+    left: 0.375rem;
+    right: 0.375rem;
+    bottom: 0.375rem;
+    z-index: 20;
+    display: flex;
+    align-items: stretch;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    background: rgba(12, 13, 17, 0.86);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Persistent state marker (watched / in progress) in the poster corner. */
+  .card-state {
+    position: absolute;
+    top: 0.375rem;
+    left: 0.375rem;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    min-width: 1.375rem;
+    height: 1.375rem;
+    padding: 0 0.3rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    pointer-events: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
+  .card-state-watched {
+    background: var(--color-success);
+    color: var(--color-success-content);
+  }
+  .card-state-progress {
+    background: #0d0f12;
+    color: var(--color-info);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-info) 55%, transparent), 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
+  .card-corner {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* One-row media strip: scrolls sideways on phones, becomes a single
+     clamped grid row from sm: up (the rest is a "View all" away). */
+  .media-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 7.75rem;
+    gap: 0.75rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
+  }
+  .media-row::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .media-row {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-rows: auto;
+      grid-auto-rows: 0;
+      column-gap: 1.125rem;
+      row-gap: 0;
+      overflow: hidden;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+  }
+  @media (min-width: 1536px) {
+    .media-row {
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    }
+  }
+  .landscape-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    gap: 0.75rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    scroll-snap-type: x mandatory;
+  }
+  .landscape-row > * {
+    scroll-snap-align: start;
+  }
+  .landscape-row::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .landscape-row {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-rows: auto;
+      grid-auto-rows: 0;
+      row-gap: 0;
+      column-gap: 1rem;
+      overflow: hidden;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+    .landscape-row.landscape-row-wrap {
+      grid-auto-rows: auto;
+      row-gap: 1.25rem;
+    }
+  }
+}
+
+.discover-tile:is(.tile-hover, .tile-focus) .card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+.discover-tile:is(.tile-hover, .tile-focus) .media-card-art img,
+.discover-tile:is(.tile-hover, .tile-focus) .media-card-art .art-fill {
+  filter: brightness(1.08);
+}
+@media (prefers-reduced-motion: no-preference) {
+  body[data-animations="on"] .card-actions {
+    transition: opacity 180ms ease-out;
+  }
+  body[data-animations="on"] .media-card-art img {
+    transition: filter 200ms ease, scale 250ms ease-out;
+  }
+  body[data-animations="on"] .discover-tile:is(.tile-hover, .tile-focus) .media-card-art img {
+    scale: 1.02;
+  }
+}
+
+/* Episode rows (title_episodes.html). Watched rows recede a little; the
+   first unwatched episode straight after a watched one is "up next". */
+.ep-row .ep-upnext,
+.ep-row .ep-upnext-line {
+  display: none;
+}
+.ep-row[data-state="watched"] .ep-name,
+.ep-row[data-state="watched"] .meta {
+  opacity: 0.6;
+}
+.ep-row[data-state="watched"] .ep-thumb {
+  filter: saturate(0.7) brightness(0.8);
+}
+.ep-row[data-state="watched"] + .ep-row[data-state="unwatched"] {
+  box-shadow: inset 2px 0 0 var(--color-primary);
+  background: linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 7%, transparent), transparent 60%);
+}
+.ep-row[data-state="watched"] + .ep-row[data-state="unwatched"] .ep-code {
+  color: var(--color-primary);
+}
+.ep-row[data-state="watched"] + .ep-row[data-state="unwatched"] .ep-upnext {
+  display: inline-flex;
+}
+.ep-row[data-state="watched"] + .ep-row[data-state="unwatched"] .ep-upnext-line {
+  display: block;
+}
+
+/* daisyUI button tuning: flatter, quieter secondaries. */
+.btn {
+  font-weight: 600;
+  box-shadow: none;
+  --btn-shadow: none;
+}
+.btn-soft:not(.btn-primary):not(.btn-error):not(.btn-success):not(.btn-warning):not(.btn-info):not(.btn-secondary):not(.btn-accent) {
+  background: var(--color-base-300);
+  border-color: transparent;
+  color: var(--color-base-content);
+}
+.btn-soft:not(.btn-primary):not(.btn-error):not(.btn-success):not(.btn-warning):not(.btn-info):not(.btn-secondary):not(.btn-accent):hover {
+  background: #272a32;
+}
+.btn-ghost:hover {
+  background: var(--color-base-300);
+}
+.input,
+.select,
+.textarea {
+  background: var(--color-base-200);
+  border-color: var(--color-line);
+}
+.input:focus,
+.input:focus-within,
+.select:focus,
+.textarea:focus {
+  border-color: color-mix(in oklab, var(--color-primary) 60%, transparent);
+  outline: none;
+}
+.modal-box {
+  background: var(--color-base-200);
 }
 
 /* Scope the Anime section to the teal accent without a second daisyUI theme —
@@ -551,9 +1339,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   pointer-events: auto;
 }
 .discover-tile:is(.tile-hover, .tile-focus) .discover-tile-zoom {
-  /* the standalone CSS `scale` property, not `transform` - matches the
-     zoom amount the old group-hover:scale-[1.06] utility used */
-  scale: 1.06;
+  /* the standalone CSS `scale` property, not `transform` */
+  scale: 1.02;
 }
 .discover-tile.discover-tile-dim:is(.tile-hover, .tile-focus) {
   opacity: 1;

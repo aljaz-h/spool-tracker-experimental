@@ -4,8 +4,8 @@
 {% block content %}
 
 
-  <div class="mb-6">
-    <h1 class="font-display text-4xl">Preview import</h1>
+  <div class="page-head !block">
+    <h1 class="page-title">Preview import</h1>
     <div class="text-ink-dim text-sm mt-1">
       {{ filename }} —
       {% if kind == "csv" %}confirm the column mapping before importing{% else %}confirm what was detected before importing{% endif %}
@@ -19,7 +19,7 @@
   {% endif %}
 
   {% if kind == "csv" %}
-    <div class="bg-base-200 border border-line rounded-2xl p-5 mb-5">
+    <div class="surface p-5 mb-5">
       <h3 class="text-lg mb-1">Column mapping</h3>
       <div class="text-ink-dim text-xs mb-4">Detected automatically from your file's headers — adjust any that guessed wrong, then refresh the preview below.</div>
       <form method="post" action="{% url 'import_csv_remap' %}" class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
@@ -29,7 +29,7 @@
             <label class="block text-xs text-ink-dim mb-1">
               {{ field }}{% if field in required_fields %} <span class="text-error">*</span>{% endif %}
             </label>
-            <select name="map_{{ field }}" class="select select-sm w-full bg-base-100">
+            <select name="map_{{ field }}" class="select select-sm w-full">
               <option value="">— none —</option>
               {% for header in headers %}
                 <option value="{{ header }}" {% if header == mapping|get_item:field %}selected{% endif %}>{{ header }}</option>
@@ -44,7 +44,7 @@
     </div>
   {% endif %}
 
-  <div class="bg-base-200 border border-line rounded-2xl p-5 mb-5">
+  <div class="surface p-5 mb-5">
     <h3 class="text-lg mb-3.5">First {{ sample_rows|length }} rows as interpreted</h3>
     {% if not sample_rows and not sample_errors %}
       <div class="text-ink-faint text-sm py-4 text-center">No data rows found in this file.</div>

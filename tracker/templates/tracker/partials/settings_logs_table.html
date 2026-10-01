@@ -117,13 +117,13 @@
     </div>
 
     <div class="flex justify-between items-center flex-wrap gap-3 mt-3.5 px-2 pb-1">
-      <span class="font-mono text-xs text-ink-faint">Page {{ logs_page.number }} of {{ logs_page.paginator.num_pages }} · {{ logs_page.paginator.count }} entries</span>
+      <span class="text-xs text-ink-faint">Page {{ logs_page.number }} of {{ logs_page.paginator.num_pages }} · {{ logs_page.paginator.count }} entries</span>
       <div class="flex gap-1.5">
         {% if logs_page.has_previous %}
-          <a href="?tab=logs&page={{ logs_page.previous_page_number }}{% if log_profile_id %}&log_profile={{ log_profile_id }}{% endif %}{% if log_sort == "oldest" %}&log_sort=oldest{% endif %}{% if log_action_type %}&log_action_type={{ log_action_type }}{% endif %}{% if log_provider %}&log_provider={{ log_provider }}{% endif %}{% if log_status %}&log_status={{ log_status }}{% endif %}{% if log_date_from %}&log_date_from={{ log_date_from }}{% endif %}{% if log_date_to %}&log_date_to={{ log_date_to }}{% endif %}" class="px-3 py-1.5 rounded-md border border-line bg-base-100 font-mono text-xs text-ink-dim">‹ Prev</a>
+          <a href="?tab=logs&page={{ logs_page.previous_page_number }}{% if log_profile_id %}&log_profile={{ log_profile_id }}{% endif %}{% if log_sort == "oldest" %}&log_sort=oldest{% endif %}{% if log_action_type %}&log_action_type={{ log_action_type }}{% endif %}{% if log_provider %}&log_provider={{ log_provider }}{% endif %}{% if log_status %}&log_status={{ log_status }}{% endif %}{% if log_date_from %}&log_date_from={{ log_date_from }}{% endif %}{% if log_date_to %}&log_date_to={{ log_date_to }}{% endif %}" class="btn btn-sm btn-ghost text-ink-dim">&larr; Prev</a>
         {% endif %}
         {% if logs_page.has_next %}
-          <a href="?tab=logs&page={{ logs_page.next_page_number }}{% if log_profile_id %}&log_profile={{ log_profile_id }}{% endif %}{% if log_sort == "oldest" %}&log_sort=oldest{% endif %}{% if log_action_type %}&log_action_type={{ log_action_type }}{% endif %}{% if log_provider %}&log_provider={{ log_provider }}{% endif %}{% if log_status %}&log_status={{ log_status }}{% endif %}{% if log_date_from %}&log_date_from={{ log_date_from }}{% endif %}{% if log_date_to %}&log_date_to={{ log_date_to }}{% endif %}" class="px-3 py-1.5 rounded-md border border-line bg-base-100 font-mono text-xs text-ink-dim">Next ›</a>
+          <a href="?tab=logs&page={{ logs_page.next_page_number }}{% if log_profile_id %}&log_profile={{ log_profile_id }}{% endif %}{% if log_sort == "oldest" %}&log_sort=oldest{% endif %}{% if log_action_type %}&log_action_type={{ log_action_type }}{% endif %}{% if log_provider %}&log_provider={{ log_provider }}{% endif %}{% if log_status %}&log_status={{ log_status }}{% endif %}{% if log_date_from %}&log_date_from={{ log_date_from }}{% endif %}{% if log_date_to %}&log_date_to={{ log_date_to }}{% endif %}" class="btn btn-sm btn-ghost text-ink-dim">Next &rarr;</a>
         {% endif %}
       </div>
     </div>
